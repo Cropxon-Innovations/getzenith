@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NavLink } from 'react-router-dom';
 import {
   FileText,
   FolderOpen,
   Image,
   FileCheck,
   FileClock,
-  Archive,
   Layers,
   LayoutTemplate,
   ChevronDown,
@@ -25,14 +23,6 @@ interface ContentItem {
   updatedAt: string;
 }
 
-const dummyContent: ContentItem[] = [
-  { id: '1', title: 'Getting Started Guide', type: 'article', status: 'published', updatedAt: '2h ago' },
-  { id: '2', title: 'Product Announcement', type: 'announcement', status: 'draft', updatedAt: '5h ago' },
-  { id: '3', title: 'Introduction to React', type: 'lesson', status: 'published', updatedAt: '1d ago' },
-  { id: '4', title: 'API Documentation', type: 'documentation', status: 'preview', updatedAt: '2d ago' },
-  { id: '5', title: 'Welcome Email Template', type: 'email', status: 'published', updatedAt: '3d ago' },
-];
-
 const contentTypes = [
   { id: 'article', label: 'Article', count: 45 },
   { id: 'documentation', label: 'Documentation', count: 23 },
@@ -46,9 +36,23 @@ interface CMSLeftSidebarProps {
   selectedContentId: string | null;
   onSelectContent: (id: string) => void;
   onNewContent: () => void;
+  contentItems?: ContentItem[];
 }
 
-export const CMSLeftSidebar = ({ selectedContentId, onSelectContent, onNewContent }: CMSLeftSidebarProps) => {
+const defaultContentItems: ContentItem[] = [
+  { id: '1', title: 'Getting Started Guide', type: 'article', status: 'published', updatedAt: '2h ago' },
+  { id: '2', title: 'Product Announcement', type: 'announcement', status: 'draft', updatedAt: '5h ago' },
+  { id: '3', title: 'Introduction to React', type: 'lesson', status: 'published', updatedAt: '1d ago' },
+  { id: '4', title: 'API Documentation', type: 'documentation', status: 'preview', updatedAt: '2d ago' },
+  { id: '5', title: 'Welcome Email Template', type: 'email', status: 'published', updatedAt: '3d ago' },
+];
+
+export const CMSLeftSidebar = ({ 
+  selectedContentId, 
+  onSelectContent, 
+  onNewContent,
+  contentItems = defaultContentItems 
+}: CMSLeftSidebarProps) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     library: true,
     types: false,
@@ -61,7 +65,7 @@ export const CMSLeftSidebar = ({ selectedContentId, onSelectContent, onNewConten
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const filteredContent = dummyContent.filter(item => {
+  const filteredContent = contentItems.filter(item => {
     if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
@@ -79,6 +83,7 @@ export const CMSLeftSidebar = ({ selectedContentId, onSelectContent, onNewConten
           <button 
             onClick={onNewContent}
             className="p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            title="Create new content"
           >
             <Plus size={14} />
           </button>
@@ -140,33 +145,39 @@ export const CMSLeftSidebar = ({ selectedContentId, onSelectContent, onNewConten
                 exit={{ height: 0, opacity: 0 }}
                 className="space-y-0.5 overflow-hidden"
               >
-                {filteredContent.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => onSelectContent(item.id)}
-                    className={cn(
-                      'w-full flex items-center gap-2 p-2 rounded-md text-left transition-all',
-                      selectedContentId === item.id
-                        ? 'bg-primary/10 border border-primary/30'
-                        : 'hover:bg-secondary/50'
-                    )}
-                  >
-                    <FileText size={14} className="text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium truncate">{item.title}</div>
-                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                        <span className="capitalize">{item.type}</span>
-                        <span>•</span>
-                        <span>{item.updatedAt}</span>
+                {filteredContent.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-muted-foreground">
+                    No content found
+                  </div>
+                ) : (
+                  filteredContent.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => onSelectContent(item.id)}
+                      className={cn(
+                        'w-full flex items-center gap-2 p-2 rounded-md text-left transition-all',
+                        selectedContentId === item.id
+                          ? 'bg-primary/10 border border-primary/30'
+                          : 'hover:bg-secondary/50'
+                      )}
+                    >
+                      <FileText size={14} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium truncate">{item.title}</div>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                          <span className="capitalize">{item.type}</span>
+                          <span>•</span>
+                          <span>{item.updatedAt}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className={cn(
-                      'w-1.5 h-1.5 rounded-full flex-shrink-0',
-                      item.status === 'published' ? 'bg-green-500' :
-                      item.status === 'preview' ? 'bg-blue-500' : 'bg-yellow-500'
-                    )} />
-                  </button>
-                ))}
+                      <div className={cn(
+                        'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                        item.status === 'published' ? 'bg-green-500' :
+                        item.status === 'preview' ? 'bg-blue-500' : 'bg-yellow-500'
+                      )} />
+                    </button>
+                  ))
+                )}
               </motion.div>
             )}
           </AnimatePresence>

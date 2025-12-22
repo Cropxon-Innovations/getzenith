@@ -1,29 +1,60 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CMSLeftSidebar } from './CMSLeftSidebar';
-import { CMSEditorCanvas } from './CMSEditorCanvas';
+import { CMSEditorCanvas, CMSEditorCanvasHandle } from './CMSEditorCanvas';
 import { CMSRightPanel } from './CMSRightPanel';
 import { CMSBlockPickerPanel } from './CMSBlockPickerPanel';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 type PreviewDevice = 'mobile' | 'tablet' | 'desktop';
+
+interface ContentItem {
+  id: string;
+  title: string;
+  type: string;
+  status: 'draft' | 'preview' | 'published';
+  updatedAt: string;
+}
 
 export const CMSStudio = () => {
   const [selectedContentId, setSelectedContentId] = useState<string | null>('1');
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop');
   const [isBlockPickerOpen, setIsBlockPickerOpen] = useState(false);
-  const editorRef = useRef<{ insertBlock: (blockId: string) => void } | null>(null);
+  const [contentItems, setContentItems] = useState<ContentItem[]>([
+    { id: '1', title: 'Getting Started Guide', type: 'article', status: 'published', updatedAt: '2h ago' },
+    { id: '2', title: 'Product Announcement', type: 'announcement', status: 'draft', updatedAt: '5h ago' },
+    { id: '3', title: 'Introduction to React', type: 'lesson', status: 'published', updatedAt: '1d ago' },
+    { id: '4', title: 'API Documentation', type: 'documentation', status: 'preview', updatedAt: '2d ago' },
+    { id: '5', title: 'Welcome Email Template', type: 'email', status: 'published', updatedAt: '3d ago' },
+  ]);
+  const editorRef = useRef<CMSEditorCanvasHandle>(null);
 
-  const handleNewContent = () => {
-    // In a real app, this would create a new content item
-    console.log('Creating new content');
-  };
+  const handleNewContent = useCallback(() => {
+    const newId = `new-${Date.now()}`;
+    const newContent: ContentItem = {
+      id: newId,
+      title: 'Untitled Content',
+      type: 'article',
+      status: 'draft',
+      updatedAt: 'Just now'
+    };
+    
+    setContentItems(prev => [newContent, ...prev]);
+    setSelectedContentId(newId);
+    toast.success('New content created', {
+      description: 'Start editing your new content item.'
+    });
+  }, []);
 
-  const handleInsertBlock = useCallback((blockId: string) => {
-    // In a real implementation, this would insert the block into Editor.js
-    console.log('Inserting block:', blockId);
-    // Keep panel open for rapid building
+  const handleInsertBlock = useCallback(async (blockId: string) => {
+    if (editorRef.current) {
+      await editorRef.current.insertBlock(blockId);
+      toast.success(`${blockId.charAt(0).toUpperCase() + blockId.slice(1)} block added`, {
+        description: 'Block inserted at cursor position.'
+      });
+    }
   }, []);
 
   const handleOpenBlockPicker = () => {
@@ -63,11 +94,13 @@ export const CMSStudio = () => {
         selectedContentId={selectedContentId}
         onSelectContent={setSelectedContentId}
         onNewContent={handleNewContent}
+        contentItems={contentItems}
       />
 
       {/* Center - Editor Canvas with Add Block Button */}
       <div className="flex-1 flex flex-col relative">
         <CMSEditorCanvas
+          ref={editorRef}
           contentId={selectedContentId}
           onDataChange={(data) => {
             // Handle autosave
@@ -108,31 +141,20 @@ export const CMSStudio = () => {
       </div>
 
       {/* Right Panel - Metadata & Settings (when block picker is closed) */}
-      <AnimatePresence mode="wait">
-        {!isBlockPickerOpen ? (
-          <motion.div
-            key="right-panel"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <CMSRightPanel
-              contentId={selectedContentId}
-              previewDevice={previewDevice}
-              onPreviewDeviceChange={setPreviewDevice}
-            />
-          </motion.div>
-        ) : (
-          <CMSBlockPickerPanel
-            key="block-picker"
-            isOpen={isBlockPickerOpen}
-            onClose={handleCloseBlockPicker}
-            onInsertBlock={handleInsertBlock}
-            userRole="tenant_admin"
-          />
-        )}
-      </AnimatePresence>
+      {!isBlockPickerOpen ? (
+        <CMSRightPanel
+          contentId={selectedContentId}
+          previewDevice={previewDevice}
+          onPreviewDeviceChange={setPreviewDevice}
+        />
+      ) : (
+        <CMSBlockPickerPanel
+          isOpen={isBlockPickerOpen}
+          onClose={handleCloseBlockPicker}
+          onInsertBlock={handleInsertBlock}
+          userRole="tenant_admin"
+        />
+      )}
     </div>
   );
 };
