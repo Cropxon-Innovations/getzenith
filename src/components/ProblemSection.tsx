@@ -2,7 +2,6 @@ import { useRef, useEffect, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Database, Globe, GraduationCap, Zap, Code, FileQuestion } from 'lucide-react';
 import { ZenithLogo } from './ZenithLogo';
-import { ParticleBackground } from './ParticleBackground';
 
 const chaosCards = [
   { icon: Database, label: 'CMS', x: -120, y: -80 },
@@ -23,17 +22,15 @@ export const ProblemSection = () => {
     if (isInView) {
       const interval = setInterval(() => {
         setAnimationCycle(prev => prev + 1);
-      }, 6000); // Full cycle every 6 seconds
+      }, 6000);
       return () => clearInterval(interval);
     }
   }, [isInView]);
 
-  const cyclePhase = animationCycle % 2; // 0 = chaos, 1 = unified
+  const cyclePhase = animationCycle % 2;
 
   return (
     <section className="py-32 relative overflow-hidden" ref={ref}>
-      <ParticleBackground density={25000} className="opacity-30" />
-      
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Visual: Chaos → Order - Looping */}
@@ -87,7 +84,7 @@ export const ProblemSection = () => {
               </motion.div>
             ))}
 
-            {/* Unified Zenith Core - appears after chaos collapses */}
+            {/* Unified Zenith Core */}
             <motion.div
               key={`core-${animationCycle}`}
               initial={{ scale: 0, opacity: 0 }}
@@ -121,7 +118,7 @@ export const ProblemSection = () => {
               </div>
             </motion.div>
 
-            {/* Animated connection pulse during transition */}
+            {/* Animated pulse during transition */}
             {cyclePhase === 1 && (
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
