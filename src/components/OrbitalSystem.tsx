@@ -11,8 +11,10 @@ const orbitingItems = [
 ];
 
 export const OrbitalSystem = () => {
+  const radius = 160;
+
   return (
-    <div className="relative w-[400px] h-[400px] sm:w-[500px] sm:h-[500px]">
+    <div className="relative w-[380px] h-[380px] sm:w-[450px] sm:h-[450px] lg:w-[500px] lg:h-[500px] flex items-center justify-center">
       {/* Outer ring */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -26,7 +28,7 @@ export const OrbitalSystem = () => {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, delay: 0.2 }}
-        className="absolute inset-12 rounded-full border border-border/20"
+        className="absolute inset-10 sm:inset-12 rounded-full border border-border/20"
       />
 
       {/* Inner ring */}
@@ -34,35 +36,34 @@ export const OrbitalSystem = () => {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, delay: 0.4 }}
-        className="absolute inset-24 rounded-full border border-border/10"
+        className="absolute inset-20 sm:inset-24 rounded-full border border-border/10"
       />
 
-      {/* Center: Zenith Core */}
+      {/* Center: Zenith Core - absolutely centered */}
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.6, type: 'spring' }}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
+        className="relative z-20 flex flex-col items-center"
       >
         <div className="relative">
-          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse-glow" />
-          <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-card border border-border flex items-center justify-center glow">
-            <ZenithLogo size={60} animated />
+          <div className="absolute -inset-4 bg-primary/20 blur-2xl rounded-full animate-pulse-glow" />
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full bg-card border border-border flex items-center justify-center glow">
+            <ZenithLogo size={56} animated />
           </div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5 }}
-            className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-medium text-gradient"
-          >
-            Zenith Core
-          </motion.div>
         </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+          className="mt-3 whitespace-nowrap text-sm font-medium text-gradient"
+        >
+          Zenith Core
+        </motion.div>
       </motion.div>
 
       {/* Orbiting items */}
-      {orbitingItems.map((item, index) => {
-        const radius = 180;
+      {orbitingItems.map((item) => {
         const baseAngle = item.angle * (Math.PI / 180);
         
         return (
@@ -71,8 +72,10 @@ export const OrbitalSystem = () => {
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8 + item.delay * 0.3, duration: 0.5, type: 'spring' }}
-            className="absolute left-1/2 top-1/2 z-10"
+            className="absolute z-10"
             style={{
+              left: '50%',
+              top: '50%',
               marginLeft: -28,
               marginTop: -28,
             }}
@@ -95,8 +98,8 @@ export const OrbitalSystem = () => {
               }}
             >
               <div className="relative group cursor-pointer">
-                <div className="w-14 h-14 rounded-xl bg-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary group-hover:glow">
-                  <item.icon size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary group-hover:glow">
+                  <item.icon size={22} className="text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                   {item.label}
@@ -117,8 +120,8 @@ export const OrbitalSystem = () => {
         </defs>
         {orbitingItems.map((item, index) => {
           const angle = item.angle * (Math.PI / 180);
-          const x = 50 + Math.cos(angle) * 36;
-          const y = 50 + Math.sin(angle) * 36;
+          const x = 50 + Math.cos(angle) * 32;
+          const y = 50 + Math.sin(angle) * 32;
           return (
             <motion.line
               key={`line-${index}`}
