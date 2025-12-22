@@ -12,15 +12,21 @@ const orbitingItems = [
 
 export const OrbitalSystem = () => {
   const radius = 160;
+  const containerSize = { sm: 380, md: 450, lg: 500 };
 
   return (
     <div className="relative w-[380px] h-[380px] sm:w-[450px] sm:h-[450px] lg:w-[500px] lg:h-[500px] flex items-center justify-center">
-      {/* Outer ring */}
+      {/* Outer ring with pulse */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1 }}
         className="absolute inset-0 rounded-full border border-border/30"
+      />
+      <motion.div
+        animate={{ scale: [1, 1.02, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-0 rounded-full border border-primary/20"
       />
 
       {/* Middle ring */}
@@ -39,6 +45,38 @@ export const OrbitalSystem = () => {
         className="absolute inset-20 sm:inset-24 rounded-full border border-border/10"
       />
 
+      {/* Connection lines SVG - rendered first so they appear behind */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
+        <defs>
+          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.2" />
+          </linearGradient>
+        </defs>
+        {orbitingItems.map((item, index) => {
+          const angle = item.angle * (Math.PI / 180);
+          // Calculate endpoint based on radius percentage of container
+          const lineRadius = 32; // percentage from center
+          const x = 50 + Math.cos(angle) * lineRadius;
+          const y = 50 + Math.sin(angle) * lineRadius;
+          
+          return (
+            <motion.line
+              key={`line-${index}`}
+              x1="50%"
+              y1="50%"
+              x2={`${x}%`}
+              y2={`${y}%`}
+              stroke="url(#lineGradient)"
+              strokeWidth="1.5"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ delay: 1.5 + index * 0.1, duration: 0.5 }}
+            />
+          );
+        })}
+      </svg>
+
       {/* Center: Zenith Core - absolutely centered */}
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
@@ -48,9 +86,13 @@ export const OrbitalSystem = () => {
       >
         <div className="relative">
           <div className="absolute -inset-4 bg-primary/20 blur-2xl rounded-full animate-pulse-glow" />
-          <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full bg-card border border-border flex items-center justify-center glow">
+          <motion.div 
+            animate={{ boxShadow: ['0 0 20px hsl(var(--primary) / 0.3)', '0 0 40px hsl(var(--primary) / 0.5)', '0 0 20px hsl(var(--primary) / 0.3)'] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full bg-card border border-border flex items-center justify-center"
+          >
             <ZenithLogo size={56} animated />
-          </div>
+          </motion.div>
         </div>
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -98,10 +140,13 @@ export const OrbitalSystem = () => {
               }}
             >
               <div className="relative group cursor-pointer">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary group-hover:glow">
+                <motion.div 
+                  whileHover={{ scale: 1.1 }}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary group-hover:shadow-lg group-hover:shadow-primary/20"
+                >
                   <item.icon size={22} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-card/80 border border-border/50 text-xs font-medium text-foreground whitespace-nowrap">
+                </motion.div>
+                <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-card/90 border border-border/50 text-xs font-medium text-foreground whitespace-nowrap shadow-sm">
                   {item.label}
                 </div>
               </div>
@@ -109,35 +154,6 @@ export const OrbitalSystem = () => {
           </motion.div>
         );
       })}
-
-      {/* Connection lines */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
-        <defs>
-          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.1" />
-          </linearGradient>
-        </defs>
-        {orbitingItems.map((item, index) => {
-          const angle = item.angle * (Math.PI / 180);
-          const x = 50 + Math.cos(angle) * 32;
-          const y = 50 + Math.sin(angle) * 32;
-          return (
-            <motion.line
-              key={`line-${index}`}
-              x1="50%"
-              y1="50%"
-              x2={`${x}%`}
-              y2={`${y}%`}
-              stroke="url(#lineGradient)"
-              strokeWidth="1"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ delay: 1.5 + index * 0.1, duration: 0.5 }}
-            />
-          );
-        })}
-      </svg>
     </div>
   );
 };

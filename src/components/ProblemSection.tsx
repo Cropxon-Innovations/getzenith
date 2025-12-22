@@ -1,7 +1,8 @@
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Database, Globe, GraduationCap, Zap, Code, FileQuestion } from 'lucide-react';
 import { ZenithLogo } from './ZenithLogo';
+import { ParticleBackground } from './ParticleBackground';
 
 const chaosCards = [
   { icon: Database, label: 'CMS', x: -120, y: -80 },
@@ -14,74 +15,121 @@ const chaosCards = [
 
 export const ProblemSection = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: false, margin: '-100px' });
+  const [animationCycle, setAnimationCycle] = useState(0);
+
+  // Create looping animation
+  useEffect(() => {
+    if (isInView) {
+      const interval = setInterval(() => {
+        setAnimationCycle(prev => prev + 1);
+      }, 6000); // Full cycle every 6 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isInView]);
+
+  const cyclePhase = animationCycle % 2; // 0 = chaos, 1 = unified
 
   return (
     <section className="py-32 relative overflow-hidden" ref={ref}>
-      <div className="container mx-auto px-6">
+      <ParticleBackground density={25000} className="opacity-30" />
+      
+      <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Visual: Chaos → Order */}
+          {/* Visual: Chaos → Order - Looping */}
           <div className="relative h-[400px] flex items-center justify-center order-2 lg:order-1">
             {/* Chaos state - floating cards */}
             {chaosCards.map((card, index) => (
               <motion.div
-                key={card.label}
+                key={`${card.label}-${animationCycle}`}
                 className="absolute"
                 initial={{ 
-                  x: card.x, 
-                  y: card.y, 
-                  opacity: 1,
-                  rotate: Math.random() * 20 - 10 
-                }}
-                animate={isInView ? {
-                  x: 0,
-                  y: 0,
+                  x: 0, 
+                  y: 0, 
                   opacity: 0,
-                  rotate: 0,
                   scale: 0,
-                } : {
-                  x: [card.x, card.x + 10, card.x - 10, card.x],
-                  y: [card.y, card.y - 10, card.y + 10, card.y],
                 }}
-                transition={isInView ? {
-                  delay: 1 + index * 0.1,
-                  duration: 0.8,
-                  ease: 'easeInOut',
+                animate={cyclePhase === 0 ? {
+                  x: [0, card.x],
+                  y: [0, card.y],
+                  opacity: [0, 1],
+                  scale: [0, 1],
+                  rotate: [0, Math.random() * 10 - 5],
                 } : {
-                  duration: 4,
-                  repeat: Infinity,
+                  x: [card.x, 0],
+                  y: [card.y, 0],
+                  opacity: [1, 0],
+                  scale: [1, 0],
+                  rotate: 0,
+                }}
+                transition={{
+                  duration: 1.5,
+                  delay: index * 0.1,
                   ease: 'easeInOut',
                 }}
               >
-                <div className="px-4 py-3 bg-card border border-border rounded-lg shadow-md flex items-center gap-2">
+                <motion.div 
+                  animate={cyclePhase === 0 ? {
+                    x: [0, 8, -8, 0],
+                    y: [0, -8, 8, 0],
+                  } : {}}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: index * 0.2,
+                  }}
+                  className="px-4 py-3 bg-card border border-border rounded-lg shadow-md flex items-center gap-2"
+                >
                   <card.icon size={18} className="text-muted-foreground" />
                   <span className="text-sm">{card.label}</span>
-                </div>
+                </motion.div>
               </motion.div>
             ))}
 
             {/* Unified Zenith Core - appears after chaos collapses */}
             <motion.div
+              key={`core-${animationCycle}`}
               initial={{ scale: 0, opacity: 0 }}
-              animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-              transition={{ delay: 2, duration: 0.5, type: 'spring' }}
+              animate={cyclePhase === 1 ? { 
+                scale: [0, 1.1, 1], 
+                opacity: 1 
+              } : { 
+                scale: 0, 
+                opacity: 0 
+              }}
+              transition={{ duration: 0.6, type: 'spring' }}
               className="absolute"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full" />
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-primary/30 blur-3xl rounded-full" 
+                />
                 <div className="relative w-32 h-32 rounded-full bg-card border border-primary flex items-center justify-center glow">
                   <ZenithLogo size={64} animated={false} />
                 </div>
                 <motion.div
                   initial={{ opacity: 0 }}
-                  animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-                  transition={{ delay: 2.5 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
                   className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-sm font-semibold text-gradient whitespace-nowrap"
                 >
                   Unified System
                 </motion.div>
               </div>
             </motion.div>
+
+            {/* Animated connection pulse during transition */}
+            {cyclePhase === 1 && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 2, 3], opacity: [0.5, 0.3, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="absolute w-32 h-32 rounded-full border-2 border-primary/50"
+              />
+            )}
           </div>
 
           {/* Content */}
@@ -126,10 +174,23 @@ export const ProblemSection = () => {
               transition={{ delay: 0.5 }}
               className="space-y-4 text-muted-foreground"
             >
-              <p>• Separate tools for content, websites, learning, and automation</p>
-              <p>• Endless integrations and custom code to maintain</p>
-              <p>• Data silos that prevent real insights</p>
-              <p>• Teams wasting time switching between platforms</p>
+              {[
+                'Separate tools for content, websites, learning, and automation',
+                'Endless integrations and custom code to maintain',
+                'Data silos that prevent real insights',
+                'Teams wasting time switching between platforms',
+              ].map((item, index) => (
+                <motion.p 
+                  key={item}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="flex items-start gap-3"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                  {item}
+                </motion.p>
+              ))}
             </motion.div>
           </motion.div>
         </div>

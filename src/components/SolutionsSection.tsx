@@ -1,8 +1,18 @@
 import { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { Rocket, Building2, GraduationCap, Briefcase, ArrowRight } from 'lucide-react';
+import { Rocket, Building2, GraduationCap, Briefcase, User, ArrowRight } from 'lucide-react';
+import { ParticleBackground } from './ParticleBackground';
 
 const solutions = [
+  {
+    id: 'solopreneurs',
+    icon: User,
+    title: 'Solopreneurs',
+    description: 'Serious individuals ready to scale without the complexity.',
+    features: ['All-in-one platform', 'No technical overhead', 'Focus on growth'],
+    dashboardPreview: 'Solopreneur Dashboard',
+    color: 'from-cyan-500 to-blue-500',
+  },
   {
     id: 'startups',
     icon: Rocket,
@@ -48,7 +58,9 @@ export const SolutionsSection = () => {
 
   return (
     <section id="solutions" className="py-32 relative" ref={ref}>
-      <div className="container mx-auto px-6">
+      <ParticleBackground density={30000} className="opacity-20" />
+      
+      <div className="container mx-auto px-6 relative z-10">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -67,8 +79,8 @@ export const SolutionsSection = () => {
           </p>
         </motion.div>
 
-        {/* Solutions grid */}
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* Solutions grid - 5 cards with first one featured */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {solutions.map((solution, index) => (
             <motion.div
               key={solution.id}
@@ -77,29 +89,51 @@ export const SolutionsSection = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               onMouseEnter={() => setHoveredId(solution.id)}
               onMouseLeave={() => setHoveredId(null)}
-              className="group relative"
+              className={`group relative ${index === 0 ? 'md:col-span-2 lg:col-span-1' : ''}`}
             >
-              <div className="h-full p-8 rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:border-primary/50">
+              <motion.div 
+                whileHover={{ y: -5 }}
+                transition={{ duration: 0.2 }}
+                className="h-full p-8 rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:border-primary/50"
+              >
                 {/* Background gradient on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${solution.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
 
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-6">
-                    <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                    <motion.div 
+                      whileHover={{ rotate: 5, scale: 1.05 }}
+                      className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors"
+                    >
                       <solution.icon size={28} className="text-primary" />
-                    </div>
-                    <ArrowRight size={20} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </motion.div>
+                    <motion.div
+                      animate={{ x: hoveredId === solution.id ? 5 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ArrowRight size={20} className="text-muted-foreground group-hover:text-primary transition-all" />
+                    </motion.div>
                   </div>
 
                   <h3 className="text-2xl font-bold mb-3">{solution.title}</h3>
                   <p className="text-muted-foreground mb-6">{solution.description}</p>
 
                   <ul className="space-y-2 mb-6">
-                    {solution.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    {solution.features.map((feature, featureIndex) => (
+                      <motion.li 
+                        key={feature} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
+                        transition={{ delay: 0.4 + index * 0.1 + featureIndex * 0.05 }}
+                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
+                        <motion.div 
+                          animate={{ scale: hoveredId === solution.id ? [1, 1.3, 1] : 1 }}
+                          transition={{ duration: 0.3, delay: featureIndex * 0.1 }}
+                          className="w-1.5 h-1.5 rounded-full bg-primary" 
+                        />
                         {feature}
-                      </li>
+                      </motion.li>
                     ))}
                   </ul>
 
@@ -107,10 +141,10 @@ export const SolutionsSection = () => {
                   <AnimatePresence>
                     {hoveredId === solution.id && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="mt-4 p-4 rounded-lg bg-secondary/50 border border-border"
+                        initial={{ opacity: 0, y: 10, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: 10, height: 0 }}
+                        className="mt-4 p-4 rounded-lg bg-secondary/50 border border-border overflow-hidden"
                       >
                         <div className="flex items-center gap-2 mb-3">
                           <div className="w-3 h-3 rounded-full bg-destructive/50" />
@@ -118,9 +152,24 @@ export const SolutionsSection = () => {
                           <div className="w-3 h-3 rounded-full bg-green-500/50" />
                         </div>
                         <div className="space-y-2">
-                          <div className="h-2 w-3/4 bg-border rounded" />
-                          <div className="h-2 w-1/2 bg-border rounded" />
-                          <div className="h-8 w-full bg-border/50 rounded mt-3" />
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: '75%' }}
+                            transition={{ duration: 0.3 }}
+                            className="h-2 bg-border rounded" 
+                          />
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: '50%' }}
+                            transition={{ duration: 0.3, delay: 0.1 }}
+                            className="h-2 bg-border rounded" 
+                          />
+                          <motion.div 
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: '100%', opacity: 1 }}
+                            transition={{ duration: 0.3, delay: 0.2 }}
+                            className="h-8 bg-border/50 rounded mt-3" 
+                          />
                         </div>
                         <p className="text-xs text-muted-foreground mt-3 text-center">
                           {solution.dashboardPreview}
@@ -129,7 +178,7 @@ export const SolutionsSection = () => {
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           ))}
         </div>
