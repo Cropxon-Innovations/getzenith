@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { CMSStudio } from '@/components/cms/CMSStudio';
 
 const studioData: Record<string, {
   icon: React.ElementType;
@@ -121,6 +122,12 @@ const studioData: Record<string, {
 
 export const StudioContent = () => {
   const { studioType = 'cms' } = useParams();
+  
+  // For CMS Studio, render the full CMS experience
+  if (studioType === 'cms') {
+    return <CMSStudio />;
+  }
+  
   const data = studioData[studioType] || studioData.cms;
   const Icon = data.icon;
 
@@ -246,7 +253,7 @@ export const StudioContent = () => {
           </motion.div>
         </div>
 
-        {/* Team Activity (Optional) */}
+        {/* Team Activity */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
