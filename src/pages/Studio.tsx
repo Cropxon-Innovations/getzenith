@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { StudioSidebar } from '@/components/studio/StudioSidebar';
 import { StudioHeader } from '@/components/studio/StudioHeader';
 import { StudioContent } from '@/components/studio/StudioContent';
@@ -5,7 +6,7 @@ import { SEO } from '@/components/SEO';
 
 const Studio = () => {
   return (
-    <>
+    <ThemeProvider>
       <SEO 
         title="Studio | Zenith" 
         description="Manage your content, experiences, and automations in Zenith Studio."
@@ -17,7 +18,7 @@ const Studio = () => {
           <StudioContent />
         </div>
       </div>
-    </>
+    </ThemeProvider>
   );
 };
 
