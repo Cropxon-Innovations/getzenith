@@ -29,11 +29,19 @@ import { Plus } from 'lucide-react';
 interface CMSEditorCanvasProps {
   contentId: string | null;
   onDataChange?: (data: OutputData) => void;
+  onRequestAddBlock?: () => void;
+}
+
+export interface InsertResult {
+  ok: boolean;
+  reason?: 'EDITOR_NOT_READY' | 'UNKNOWN_BLOCK' | 'INSERT_FAILED';
+  error?: string;
 }
 
 export interface CMSEditorCanvasHandle {
-  insertBlock: (blockType: string, data?: Record<string, unknown>) => Promise<void>;
+  insertBlock: (blockType: string, data?: Record<string, unknown>) => Promise<InsertResult>;
   getEditor: () => EditorJS | null;
+  isReady: () => boolean;
 }
 
 const getDefaultBlockData = (blockType: string): Record<string, unknown> => {
@@ -155,15 +163,17 @@ const emptyContent: OutputData = {
 };
 
 export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvasProps>(
-  ({ contentId, onDataChange }, ref) => {
+  ({ contentId, onDataChange, onRequestAddBlock }, ref) => {
     const editorRef = useRef<EditorJS | null>(null);
     const holderRef = useRef<HTMLDivElement>(null);
     const [isReady, setIsReady] = useState(false);
     const [isEmpty, setIsEmpty] = useState(true);
 
     useImperativeHandle(ref, () => ({
-      insertBlock: async (blockType: string, data?: Record<string, unknown>) => {
-        if (!editorRef.current || !isReady) return;
+      insertBlock: async (blockType: string, data?: Record<string, unknown>): Promise<InsertResult> => {
+        if (!editorRef.current || !isReady) {
+          return { ok: false, reason: 'EDITOR_NOT_READY' };
+        }
         
         const blockData = data || getDefaultBlockData(blockType);
         
@@ -177,11 +187,15 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
           const savedData = await editorRef.current.save();
           setIsEmpty(savedData.blocks.length === 0);
           onDataChange?.(savedData);
+          
+          return { ok: true };
         } catch (error) {
           console.error('Failed to insert block:', error);
+          return { ok: false, reason: 'INSERT_FAILED', error: String(error) };
         }
       },
-      getEditor: () => editorRef.current
+      getEditor: () => editorRef.current,
+      isReady: () => isReady
     }), [isReady, onDataChange]);
 
     const initEditor = useCallback(async () => {
@@ -314,10 +328,13 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
             >
               {/* Empty State */}
               {isEmpty && isReady && (
-                <div className="border-2 border-dashed border-border rounded-xl p-12 text-center">
+                <button 
+                  onClick={onRequestAddBlock}
+                  className="w-full border-2 border-dashed border-border rounded-xl p-12 text-center hover:border-primary/50 hover:bg-muted/30 transition-colors cursor-pointer"
+                >
                   <Plus size={32} className="mx-auto mb-3 text-muted-foreground" />
                   <p className="text-muted-foreground">Add your first block</p>
-                </div>
+                </button>
               )}
 
               {/* Editor.js Container */}

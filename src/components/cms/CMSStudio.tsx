@@ -1,10 +1,14 @@
 import { useState, useCallback } from 'react';
 import { CMSContentList } from './CMSContentList';
 import { CMSEditorView } from './CMSEditorView';
+import { CMSContentProvider, useCMSContent } from './state/CMSContentStore';
+import { CollaborationProvider } from './collab/CollaborationProvider';
+import { CursorOverlay } from './collab/CursorOverlay';
 
-export const CMSStudio = () => {
+const CMSStudioInner = () => {
   const [view, setView] = useState<'list' | 'editor'>('list');
   const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
+  const { createContent } = useCMSContent();
 
   const handleSelectContent = useCallback((id: string) => {
     setSelectedContentId(id);
@@ -12,10 +16,10 @@ export const CMSStudio = () => {
   }, []);
 
   const handleNewContent = useCallback(() => {
-    const newId = `new-${Date.now()}`;
-    setSelectedContentId(newId);
+    const newContent = createContent();
+    setSelectedContentId(newContent.id);
     setView('editor');
-  }, []);
+  }, [createContent]);
 
   const handleBack = useCallback(() => {
     setView('list');
@@ -23,8 +27,21 @@ export const CMSStudio = () => {
   }, []);
 
   if (view === 'editor' && selectedContentId) {
-    return <CMSEditorView contentId={selectedContentId} onBack={handleBack} />;
+    return (
+      <CollaborationProvider contentId={selectedContentId}>
+        <CursorOverlay />
+        <CMSEditorView contentId={selectedContentId} onBack={handleBack} />
+      </CollaborationProvider>
+    );
   }
 
   return <CMSContentList onSelectContent={handleSelectContent} onNewContent={handleNewContent} />;
+};
+
+export const CMSStudio = () => {
+  return (
+    <CMSContentProvider>
+      <CMSStudioInner />
+    </CMSContentProvider>
+  );
 };
