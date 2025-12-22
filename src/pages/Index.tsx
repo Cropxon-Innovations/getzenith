@@ -7,7 +7,7 @@ import { SystemsSection } from '@/components/SystemsSection';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { SolutionsSection } from '@/components/SolutionsSection';
 import { TrustSection } from '@/components/TrustSection';
-import { PreviewSection } from '@/components/PreviewSection';
+import { LivePlatformPreview } from '@/components/platform-preview/LivePlatformPreview';
 import { CTASection } from '@/components/CTASection';
 import { Footer } from '@/components/Footer';
 import { SectionDivider } from '@/components/SectionDivider';
@@ -31,7 +31,7 @@ const Index = () => {
           <SectionDivider />
           <TrustSection />
           <SectionDivider />
-          <PreviewSection />
+          <LivePlatformPreview />
           <CTASection />
         </main>
         <Footer />
