@@ -13,6 +13,18 @@ import Delimiter from '@editorjs/delimiter';
 import Code from '@editorjs/code';
 // @ts-ignore
 import Table from '@editorjs/table';
+// @ts-ignore
+import ImageTool from '@editorjs/image';
+// @ts-ignore
+import Embed from '@editorjs/embed';
+
+// Custom blocks
+import HeroBlock from './editor-blocks/HeroBlock';
+import CTABlock from './editor-blocks/CTABlock';
+import FeatureGridBlock from './editor-blocks/FeatureGridBlock';
+import QuizBlock from './editor-blocks/QuizBlock';
+import LessonContentBlock from './editor-blocks/LessonContentBlock';
+import TestimonialBlock from './editor-blocks/TestimonialBlock';
 
 interface CMSEditorCanvasProps {
   contentId: string | null;
@@ -36,6 +48,16 @@ const dummyContent: OutputData = {
       }
     },
     {
+      type: 'hero',
+      data: {
+        title: 'Build Better Digital Experiences',
+        subtitle: 'The all-in-one platform for content, websites, learning, and automation.',
+        ctaText: 'Get Started Free',
+        ctaUrl: '#',
+        alignment: 'center'
+      }
+    },
+    {
       type: 'header',
       data: {
         text: 'Core Concepts',
@@ -46,6 +68,17 @@ const dummyContent: OutputData = {
       type: 'paragraph',
       data: {
         text: 'Zenith Studio is built around four integrated systems that work together to power your entire digital presence:'
+      }
+    },
+    {
+      type: 'featureGrid',
+      data: {
+        columns: 3,
+        features: [
+          { title: 'CMS Studio', description: 'Your content system of record', icon: '📝' },
+          { title: 'Website Builder', description: 'Create and manage web experiences', icon: '🌐' },
+          { title: 'LMS Studio', description: 'Build learning journeys and courses', icon: '📚' },
+        ]
       }
     },
     {
@@ -65,6 +98,63 @@ const dummyContent: OutputData = {
       data: {
         text: 'Content created in CMS Studio can be rendered on websites, structured into lessons, used in emails, and consumed by external systems via APIs.',
         caption: 'The Zenith Philosophy'
+      }
+    },
+    {
+      type: 'testimonial',
+      data: {
+        quote: 'Zenith Studio has transformed how we manage content across our organization. Everything is connected, consistent, and easy to maintain.',
+        author: 'Alex Chen',
+        role: 'VP of Digital',
+        company: 'Enterprise Co.',
+        avatarUrl: ''
+      }
+    },
+    {
+      type: 'cta',
+      data: {
+        heading: 'Ready to Transform Your Content?',
+        description: 'Start building with Zenith Studio today.',
+        primaryText: 'Start Free Trial',
+        primaryUrl: '#',
+        secondaryText: 'View Documentation',
+        secondaryUrl: '#',
+        style: 'default'
+      }
+    },
+    {
+      type: 'header',
+      data: {
+        text: 'Learning Module Example',
+        level: 2
+      }
+    },
+    {
+      type: 'lessonContent',
+      data: {
+        lessonTitle: 'Introduction to Content Management',
+        duration: '15 min',
+        objectives: [
+          'Understand the block-based content model',
+          'Learn how to create and organize content',
+          'Master the publishing workflow'
+        ],
+        content: 'In this lesson, you will learn the fundamentals of content management in Zenith Studio.',
+        videoUrl: ''
+      }
+    },
+    {
+      type: 'quiz',
+      data: {
+        question: 'What is the primary benefit of block-based content?',
+        options: [
+          { text: 'Reusability across different contexts', isCorrect: true },
+          { text: 'Faster page load times', isCorrect: false },
+          { text: 'Better SEO rankings', isCorrect: false },
+          { text: 'Reduced server costs', isCorrect: false }
+        ],
+        explanation: 'Block-based content can be reused across websites, LMS courses, emails, and APIs without duplication.',
+        type: 'single'
       }
     },
     {
@@ -108,6 +198,7 @@ export const CMSEditorCanvas = ({ contentId, onDataChange }: CMSEditorCanvasProp
       data: dummyContent,
       placeholder: 'Start writing or press "/" for commands...',
       tools: {
+        // Core blocks
         header: {
           class: Header,
           config: {
@@ -139,7 +230,62 @@ export const CMSEditorCanvas = ({ contentId, onDataChange }: CMSEditorCanvasProp
             rows: 2,
             cols: 3
           }
-        }
+        },
+        // Media blocks
+        image: {
+          class: ImageTool,
+          config: {
+            uploader: {
+              uploadByFile: async (file: File) => {
+                // Placeholder - in production, upload to storage
+                const url = URL.createObjectURL(file);
+                return {
+                  success: 1,
+                  file: { url }
+                };
+              },
+              uploadByUrl: async (url: string) => {
+                return {
+                  success: 1,
+                  file: { url }
+                };
+              }
+            }
+          }
+        },
+        embed: {
+          class: Embed,
+          config: {
+            services: {
+              youtube: true,
+              vimeo: true,
+              twitter: true,
+              instagram: true,
+              codepen: true,
+              gist: true
+            }
+          }
+        },
+        // Experience blocks
+        hero: {
+          class: HeroBlock as any,
+        },
+        cta: {
+          class: CTABlock as any,
+        },
+        featureGrid: {
+          class: FeatureGridBlock as any,
+        },
+        testimonial: {
+          class: TestimonialBlock as any,
+        },
+        // Education blocks
+        lessonContent: {
+          class: LessonContentBlock as any,
+        },
+        quiz: {
+          class: QuizBlock as any,
+        },
       },
       onChange: async () => {
         if (editorRef.current) {
@@ -226,7 +372,7 @@ export const CMSEditorCanvas = ({ contentId, onDataChange }: CMSEditorCanvasProp
 
       {/* Editor Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto py-8 px-6">
+        <div className="max-w-4xl mx-auto py-8 px-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isReady ? 1 : 0.5 }}
@@ -235,7 +381,7 @@ export const CMSEditorCanvas = ({ contentId, onDataChange }: CMSEditorCanvasProp
             <div 
               ref={holderRef} 
               className="prose prose-sm dark:prose-invert max-w-none
-                [&_.ce-block]:py-1
+                [&_.ce-block]:py-2
                 [&_.ce-block__content]:max-w-none
                 [&_.ce-toolbar]:left-0
                 [&_.ce-inline-toolbar]:bg-card
