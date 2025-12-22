@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Database, Layout, Globe, GraduationCap, Zap } from 'lucide-react';
+import { Layout, Globe, GraduationCap, Zap, FileText } from 'lucide-react';
 import { ZenithLogo } from './ZenithLogo';
 
 const orbitingItems = [
-  { icon: Database, label: 'CMS', delay: 0, angle: 0 },
+  { icon: FileText, label: 'CMS', delay: 0, angle: 0 },
   { icon: Layout, label: 'Canvas', delay: 0.5, angle: 72 },
   { icon: Globe, label: 'Website', delay: 1, angle: 144 },
   { icon: GraduationCap, label: 'LMS', delay: 1.5, angle: 216 },
@@ -15,25 +15,39 @@ export const OrbitalSystem = () => {
 
   return (
     <div className="relative w-[380px] h-[380px] sm:w-[450px] sm:h-[450px] lg:w-[500px] lg:h-[500px] flex items-center justify-center">
-      {/* Outer ring with pulse */}
+      {/* Outer ring with rotating animation */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1 }}
+        animate={{ opacity: 1, scale: 1, rotate: 360 }}
+        transition={{ 
+          opacity: { duration: 1 },
+          scale: { duration: 1 },
+          rotate: { duration: 60, repeat: Infinity, ease: 'linear' }
+        }}
         className="absolute inset-0 rounded-full border border-border/30"
+        style={{ borderStyle: 'dashed', borderSpacing: '10px' }}
       />
       <motion.div
-        animate={{ scale: [1, 1.02, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ scale: [1, 1.02, 1], opacity: [0.3, 0.5, 0.3], rotate: -360 }}
+        transition={{ 
+          scale: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+          opacity: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+          rotate: { duration: 45, repeat: Infinity, ease: 'linear' }
+        }}
         className="absolute inset-0 rounded-full border border-primary/20"
       />
 
-      {/* Middle ring */}
+      {/* Middle ring - subtle counter rotation */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.2 }}
+        animate={{ opacity: 1, scale: 1, rotate: -360 }}
+        transition={{ 
+          opacity: { duration: 1, delay: 0.2 },
+          scale: { duration: 1, delay: 0.2 },
+          rotate: { duration: 90, repeat: Infinity, ease: 'linear' }
+        }}
         className="absolute inset-10 sm:inset-12 rounded-full border border-border/20"
+        style={{ borderStyle: 'dotted' }}
       />
 
       {/* Inner ring */}
@@ -48,9 +62,9 @@ export const OrbitalSystem = () => {
       <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
         <defs>
           <linearGradient id="lineGradientActive" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-            <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.3" />
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.9" />
+            <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.4" />
           </linearGradient>
           <filter id="glow">
             <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -62,28 +76,30 @@ export const OrbitalSystem = () => {
         </defs>
         {orbitingItems.map((item, index) => {
           const angle = item.angle * (Math.PI / 180);
+          // Increase line radius to actually reach the orbiting items
           const lineRadius = 32;
           const x = 50 + Math.cos(angle) * lineRadius;
           const y = 50 + Math.sin(angle) * lineRadius;
           
           return (
             <g key={`line-group-${index}`}>
-              {/* Main connection line */}
+              {/* Main connection line - thicker and more visible */}
               <motion.line
                 x1="50%"
                 y1="50%"
                 x2={`${x}%`}
                 y2={`${y}%`}
                 stroke="url(#lineGradientActive)"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 filter="url(#glow)"
+                strokeLinecap="round"
                 initial={{ pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ delay: 1.2 + index * 0.15, duration: 0.6 }}
+                transition={{ delay: 1.0 + index * 0.12, duration: 0.5 }}
               />
               {/* Animated pulse along the line */}
               <motion.circle
-                r="3"
+                r="4"
                 fill="hsl(var(--primary))"
                 filter="url(#glow)"
                 initial={{ opacity: 0 }}
@@ -93,10 +109,10 @@ export const OrbitalSystem = () => {
                   opacity: [0, 1, 1, 0],
                 }}
                 transition={{
-                  delay: 2 + index * 0.3,
-                  duration: 2,
+                  delay: 1.8 + index * 0.25,
+                  duration: 1.5,
                   repeat: Infinity,
-                  repeatDelay: 3,
+                  repeatDelay: 2.5,
                   ease: 'easeInOut',
                 }}
               />
@@ -114,19 +130,19 @@ export const OrbitalSystem = () => {
       >
         <div className="relative">
           {/* Glow effect */}
-          <div className="absolute -inset-6 bg-primary/20 blur-3xl rounded-full animate-pulse-glow" />
+          <div className="absolute -inset-8 bg-primary/25 blur-3xl rounded-full animate-pulse" />
           
           {/* Main circle with curved text */}
           <motion.div 
             animate={{ 
               boxShadow: [
-                '0 0 20px hsl(var(--primary) / 0.3)', 
-                '0 0 40px hsl(var(--primary) / 0.5)', 
-                '0 0 20px hsl(var(--primary) / 0.3)'
+                '0 0 30px hsl(var(--primary) / 0.4)', 
+                '0 0 50px hsl(var(--primary) / 0.6)', 
+                '0 0 30px hsl(var(--primary) / 0.4)'
               ] 
             }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-background border-2 border-primary/30 flex items-center justify-center overflow-hidden"
+            className="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full bg-background border-2 border-primary/40 flex items-center justify-center overflow-hidden"
           >
             {/* Curved "Zenith Core" text at top */}
             <svg 
@@ -136,16 +152,16 @@ export const OrbitalSystem = () => {
               <defs>
                 <path
                   id="curvedTextPath"
-                  d="M 50,50 m -32,0 a 32,32 0 1,1 64,0"
+                  d="M 50,50 m -34,0 a 34,34 0 1,1 68,0"
                   fill="none"
                 />
               </defs>
               <text
                 className="fill-primary"
                 style={{ 
-                  fontSize: '8px', 
-                  fontWeight: 600, 
-                  letterSpacing: '0.15em',
+                  fontSize: '7.5px', 
+                  fontWeight: 700, 
+                  letterSpacing: '0.18em',
                   textTransform: 'uppercase'
                 }}
               >
@@ -160,15 +176,15 @@ export const OrbitalSystem = () => {
             </svg>
             
             {/* Logo centered below the curved text */}
-            <div className="mt-4">
-              <ZenithLogo size={48} animated />
+            <div className="mt-5">
+              <ZenithLogo size={44} animated />
             </div>
             
             {/* Inner glow ring */}
             <motion.div
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              animate={{ opacity: [0.4, 0.7, 0.4] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-2 rounded-full border border-primary/20"
+              className="absolute inset-3 rounded-full border border-primary/30"
             />
           </motion.div>
         </div>
