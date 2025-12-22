@@ -18,13 +18,13 @@ import ImageTool from '@editorjs/image';
 // @ts-ignore
 import Embed from '@editorjs/embed';
 
-// Custom blocks
 import HeroBlock from './editor-blocks/HeroBlock';
 import CTABlock from './editor-blocks/CTABlock';
 import FeatureGridBlock from './editor-blocks/FeatureGridBlock';
 import QuizBlock from './editor-blocks/QuizBlock';
 import LessonContentBlock from './editor-blocks/LessonContentBlock';
 import TestimonialBlock from './editor-blocks/TestimonialBlock';
+import { Plus } from 'lucide-react';
 
 interface CMSEditorCanvasProps {
   contentId: string | null;
@@ -36,7 +36,6 @@ export interface CMSEditorCanvasHandle {
   getEditor: () => EditorJS | null;
 }
 
-// Default data for different block types
 const getDefaultBlockData = (blockType: string): Record<string, unknown> => {
   switch (blockType) {
     case 'header':
@@ -121,10 +120,7 @@ const dummyContent: OutputData = {
   blocks: [
     {
       type: 'header',
-      data: {
-        text: 'Getting Started with Zenith Studio',
-        level: 1
-      }
+      data: { text: 'Getting Started with Zenith Studio', level: 1 }
     },
     {
       type: 'paragraph',
@@ -134,16 +130,7 @@ const dummyContent: OutputData = {
     },
     {
       type: 'header',
-      data: {
-        text: 'Core Concepts',
-        level: 2
-      }
-    },
-    {
-      type: 'paragraph',
-      data: {
-        text: 'Zenith Studio is built around four integrated systems that work together to power your entire digital presence:'
-      }
+      data: { text: 'Core Concepts', level: 2 }
     },
     {
       type: 'list',
@@ -157,44 +144,13 @@ const dummyContent: OutputData = {
         ]
       }
     },
-    {
-      type: 'quote',
-      data: {
-        text: 'Content created in CMS Studio can be rendered on websites, structured into lessons, used in emails, and consumed by external systems via APIs.',
-        caption: 'The Zenith Philosophy'
-      }
-    },
-    {
-      type: 'delimiter',
-      data: {}
-    },
-    {
-      type: 'paragraph',
-      data: {
-        text: '<i>Last updated: December 2024</i>'
-      }
-    }
   ],
   version: '2.28.2'
 };
 
 const emptyContent: OutputData = {
   time: Date.now(),
-  blocks: [
-    {
-      type: 'header',
-      data: {
-        text: 'Untitled Content',
-        level: 1
-      }
-    },
-    {
-      type: 'paragraph',
-      data: {
-        text: 'Start writing your content here...'
-      }
-    }
-  ],
+  blocks: [],
   version: '2.28.2'
 };
 
@@ -203,9 +159,8 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
     const editorRef = useRef<EditorJS | null>(null);
     const holderRef = useRef<HTMLDivElement>(null);
     const [isReady, setIsReady] = useState(false);
-    const [lastSaved, setLastSaved] = useState<Date | null>(null);
+    const [isEmpty, setIsEmpty] = useState(true);
 
-    // Expose methods to parent component
     useImperativeHandle(ref, () => ({
       insertBlock: async (blockType: string, data?: Record<string, unknown>) => {
         if (!editorRef.current || !isReady) return;
@@ -213,20 +168,15 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
         const blockData = data || getDefaultBlockData(blockType);
         
         try {
-          // Get current block index
           const currentBlockIndex = editorRef.current.blocks.getCurrentBlockIndex();
           const insertIndex = currentBlockIndex >= 0 ? currentBlockIndex + 1 : editorRef.current.blocks.getBlocksCount();
           
-          // Insert new block
           await editorRef.current.blocks.insert(blockType, blockData, undefined, insertIndex, true);
-          
-          // Focus on the new block
           editorRef.current.caret.setToBlock(insertIndex, 'start');
           
-          // Trigger save
           const savedData = await editorRef.current.save();
+          setIsEmpty(savedData.blocks.length === 0);
           onDataChange?.(savedData);
-          setLastSaved(new Date());
         } catch (error) {
           console.error('Failed to insert block:', error);
         }
@@ -237,62 +187,46 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
     const initEditor = useCallback(async () => {
       if (!holderRef.current || editorRef.current) return;
 
+      const isNewContent = contentId?.startsWith('new');
+      const initialData = isNewContent ? emptyContent : dummyContent;
+      setIsEmpty(initialData.blocks.length === 0);
+
       const editor = new EditorJS({
         holder: holderRef.current,
-        data: contentId === 'new' ? emptyContent : dummyContent,
-        placeholder: 'Start writing or press "/" for commands...',
+        data: initialData,
+        placeholder: 'Start writing or click Add Block...',
         tools: {
-          // Core blocks
           header: {
             class: Header,
-            config: {
-              levels: [1, 2, 3, 4],
-              defaultLevel: 2
-            }
+            config: { levels: [1, 2, 3, 4], defaultLevel: 2 }
           },
           list: {
             class: List,
             inlineToolbar: true,
-            config: {
-              defaultStyle: 'unordered'
-            }
+            config: { defaultStyle: 'unordered' }
           },
           quote: {
             class: Quote,
             inlineToolbar: true,
-            config: {
-              quotePlaceholder: 'Enter a quote',
-              captionPlaceholder: 'Quote author'
-            }
+            config: { quotePlaceholder: 'Enter a quote', captionPlaceholder: 'Quote author' }
           },
           delimiter: Delimiter,
           code: Code,
           table: {
             class: Table as any,
             inlineToolbar: true,
-            config: {
-              rows: 2,
-              cols: 3
-            }
+            config: { rows: 2, cols: 3 }
           },
-          // Media blocks
           image: {
             class: ImageTool,
             config: {
               uploader: {
                 uploadByFile: async (file: File) => {
-                  // Placeholder - in production, upload to storage
                   const url = URL.createObjectURL(file);
-                  return {
-                    success: 1,
-                    file: { url }
-                  };
+                  return { success: 1, file: { url } };
                 },
                 uploadByUrl: async (url: string) => {
-                  return {
-                    success: 1,
-                    file: { url }
-                  };
+                  return { success: 1, file: { url } };
                 }
               }
             }
@@ -300,42 +234,21 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
           embed: {
             class: Embed,
             config: {
-              services: {
-                youtube: true,
-                vimeo: true,
-                twitter: true,
-                instagram: true,
-                codepen: true,
-                gist: true
-              }
+              services: { youtube: true, vimeo: true, twitter: true, instagram: true, codepen: true, gist: true }
             }
           },
-          // Experience blocks
-          hero: {
-            class: HeroBlock as any,
-          },
-          cta: {
-            class: CTABlock as any,
-          },
-          featureGrid: {
-            class: FeatureGridBlock as any,
-          },
-          testimonial: {
-            class: TestimonialBlock as any,
-          },
-          // Education blocks
-          lessonContent: {
-            class: LessonContentBlock as any,
-          },
-          quiz: {
-            class: QuizBlock as any,
-          },
+          hero: { class: HeroBlock as any },
+          cta: { class: CTABlock as any },
+          featureGrid: { class: FeatureGridBlock as any },
+          testimonial: { class: TestimonialBlock as any },
+          lessonContent: { class: LessonContentBlock as any },
+          quiz: { class: QuizBlock as any },
         },
         onChange: async () => {
           if (editorRef.current) {
             const data = await editorRef.current.save();
+            setIsEmpty(data.blocks.length === 0);
             onDataChange?.(data);
-            setLastSaved(new Date());
           }
         },
         onReady: () => {
@@ -358,15 +271,13 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
       };
     }, [initEditor]);
 
-    // Reinitialize when content changes
     useEffect(() => {
       const renderContent = async () => {
         if (contentId && editorRef.current && isReady) {
           try {
-            // Wait for editor to be ready
             await editorRef.current.isReady;
-            // In a real app, fetch content by ID and render it
             const content = contentId.startsWith('new') ? emptyContent : dummyContent;
+            setIsEmpty(content.blocks.length === 0);
             if (editorRef.current.render) {
               await editorRef.current.render(content);
             }
@@ -381,86 +292,63 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
     if (!contentId) {
       return (
         <div className="flex-1 flex items-center justify-center bg-background">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="w-16 h-16 rounded-2xl bg-secondary/50 border border-border flex items-center justify-center mx-auto mb-4">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
-              </svg>
-            </div>
+          <div className="text-center">
             <h3 className="text-lg font-semibold mb-2">Select content to edit</h3>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Choose a content item from the library or create new content to start editing.
+            <p className="text-sm text-muted-foreground">
+              Choose a content item from the library or create new content.
             </p>
-          </motion.div>
+          </div>
         </div>
       );
     }
 
-    const contentTitle = contentId === 'new' ? 'Untitled Content' : 'Getting Started Guide';
-    const contentStatus = contentId === 'new' ? 'Draft' : 'Published';
-    const statusColor = contentId === 'new' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-green-500/10 text-green-500';
-
     return (
       <div className="flex-1 flex flex-col bg-background overflow-hidden">
-        {/* Editor Toolbar / Status */}
-        <div className="h-12 border-b border-border flex items-center justify-between px-4 bg-card/50">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium">{contentTitle}</span>
-            <span className={`px-2 py-0.5 text-[10px] rounded-full ${statusColor}`}>
-              {contentStatus}
-            </span>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            {lastSaved && (
-              <span>Saved {lastSaved.toLocaleTimeString()}</span>
-            )}
-            <motion.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-2 h-2 rounded-full bg-green-500"
-            />
-            <span>Autosave on</span>
-          </div>
-        </div>
-
         {/* Editor Area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto py-8 px-6">
+          <div className="max-w-3xl mx-auto py-12 px-6">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: isReady ? 1 : 0.5 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Empty State */}
+              {isEmpty && isReady && (
+                <div className="border-2 border-dashed border-border rounded-xl p-12 text-center">
+                  <Plus size={32} className="mx-auto mb-3 text-muted-foreground" />
+                  <p className="text-muted-foreground">Add your first block</p>
+                </div>
+              )}
+
+              {/* Editor.js Container */}
               <div 
                 ref={holderRef} 
-                className="prose prose-sm dark:prose-invert max-w-none
-                  [&_.ce-block]:py-2
+                className={`prose prose-sm dark:prose-invert max-w-none
+                  ${isEmpty ? 'hidden' : ''}
+                  [&_.ce-block]:py-1
                   [&_.ce-block__content]:max-w-none
                   [&_.ce-toolbar]:left-0
                   [&_.ce-inline-toolbar]:bg-card
                   [&_.ce-inline-toolbar]:border-border
+                  [&_.ce-inline-toolbar]:shadow-lg
                   [&_.ce-conversion-toolbar]:bg-card
                   [&_.ce-conversion-toolbar]:border-border
                   [&_.ce-settings]:bg-card
                   [&_.ce-settings]:border-border
                   [&_.ce-popover]:bg-card
                   [&_.ce-popover]:border-border
-                  [&_.ce-header]:font-display
+                  [&_.ce-popover]:shadow-lg
                   [&_h1]:text-3xl
+                  [&_h1]:font-bold
                   [&_h2]:text-2xl
+                  [&_h2]:font-semibold
                   [&_h3]:text-xl
                   [&_.cdx-quote]:border-l-primary
-                  [&_.cdx-quote]:bg-secondary/30
+                  [&_.cdx-quote]:bg-muted/50
+                  [&_.cdx-quote]:rounded-r-lg
+                  [&_.cdx-quote]:p-4
                   [&_.ce-delimiter]:before:bg-border
-                "
+                `}
               />
             </motion.div>
           </div>
