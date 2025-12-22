@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Rocket, Building2, GraduationCap, Briefcase, User, ArrowRight } from 'lucide-react';
-import { ParticleBackground } from './ParticleBackground';
 
 const solutions = [
   {
@@ -58,8 +57,6 @@ export const SolutionsSection = () => {
 
   return (
     <section id="solutions" className="py-32 relative" ref={ref}>
-      <ParticleBackground density={30000} className="opacity-20" />
-      
       <div className="container mx-auto px-6 relative z-10">
         {/* Section header */}
         <motion.div
@@ -79,7 +76,7 @@ export const SolutionsSection = () => {
           </p>
         </motion.div>
 
-        {/* Solutions grid - 5 cards with first one featured */}
+        {/* Solutions grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {solutions.map((solution, index) => (
             <motion.div
