@@ -34,56 +34,11 @@ interface CMSContentListProps {
 }
 
 const mockContent: ContentItem[] = [
-  {
-    id: '1',
-    title: 'Homepage',
-    type: 'website page',
-    author: 'Admin',
-    date: '15/01/2024',
-    blocks: 5,
-    status: 'published',
-    tags: [],
-  },
-  {
-    id: '2',
-    title: '10 Tips for Effective Online Learning',
-    type: 'blog post',
-    author: 'Sarah Johnson',
-    date: '20/01/2024',
-    blocks: 7,
-    status: 'published',
-    tags: ['public share'],
-  },
-  {
-    id: '3',
-    title: 'JavaScript Variables Lesson',
-    type: 'lms lesson',
-    author: 'Mike Chen',
-    date: '22/01/2024',
-    blocks: 6,
-    status: 'draft',
-    tags: [],
-  },
-  {
-    id: '4',
-    title: 'Weekly Newsletter Template',
-    type: 'email template',
-    author: 'Unknown',
-    date: '25/01/2024',
-    blocks: 2,
-    status: 'scheduled',
-    tags: ['automation input'],
-  },
-  {
-    id: '5',
-    title: 'Course Announcement',
-    type: 'announcement',
-    author: 'Unknown',
-    date: '28/01/2024',
-    blocks: 3,
-    status: 'published',
-    tags: ['email template'],
-  },
+  { id: '1', title: 'Homepage', type: 'website page', author: 'Admin', date: '15/01/2024', blocks: 5, status: 'published', tags: [] },
+  { id: '2', title: '10 Tips for Effective Online Learning', type: 'blog post', author: 'Sarah Johnson', date: '20/01/2024', blocks: 7, status: 'published', tags: ['public share'] },
+  { id: '3', title: 'JavaScript Variables Lesson', type: 'lms lesson', author: 'Mike Chen', date: '22/01/2024', blocks: 6, status: 'draft', tags: [] },
+  { id: '4', title: 'Weekly Newsletter Template', type: 'email template', author: 'Unknown', date: '25/01/2024', blocks: 2, status: 'scheduled', tags: ['automation input'] },
+  { id: '5', title: 'Course Announcement', type: 'announcement', author: 'Unknown', date: '28/01/2024', blocks: 3, status: 'published', tags: ['email template'] },
 ];
 
 const stats = [
@@ -116,42 +71,42 @@ export const CMSContentList = ({ onSelectContent, onNewContent }: CMSContentList
   return (
     <div className="flex-1 flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="p-6 pb-0">
-        <div className="flex items-center justify-between mb-6">
+      <div className="p-4 sm:p-6 pb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
               <FileText size={20} className="text-muted-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold">CMS Studio</h1>
-              <p className="text-sm text-muted-foreground">Content Operating System</p>
+              <h1 className="text-lg sm:text-xl font-semibold">CMS Studio</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">Content Operating System</p>
             </div>
           </div>
-          <Button onClick={onNewContent} className="gap-2">
+          <Button onClick={onNewContent} className="gap-2 w-full sm:w-auto">
             <Plus size={16} />
             New Content
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        {/* Stats - Responsive grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="p-4 rounded-xl border border-border bg-card"
+              className="p-3 sm:p-4 rounded-xl border border-border bg-card"
             >
-              <stat.icon size={18} className="text-muted-foreground mb-2" />
-              <div className="text-2xl font-semibold">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <stat.icon size={16} className="text-muted-foreground mb-1.5 sm:mb-2" />
+              <div className="text-xl sm:text-2xl font-semibold">{stat.value}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">{stat.label}</div>
             </motion.div>
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative w-80 mb-6">
+        {/* Search - Full width on mobile */}
+        <div className="relative w-full sm:w-80 mb-4 sm:mb-6">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
@@ -164,7 +119,7 @@ export const CMSContentList = ({ onSelectContent, onNewContent }: CMSContentList
       </div>
 
       {/* Content List */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="space-y-2">
           {filteredContent.map((item, index) => (
             <motion.div
@@ -172,66 +127,81 @@ export const CMSContentList = ({ onSelectContent, onNewContent }: CMSContentList
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
-              className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors cursor-pointer group"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors cursor-pointer group"
               onClick={() => onSelectContent(item.id)}
             >
-              {/* Icon */}
-              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                <FileText size={18} className="text-muted-foreground" />
-              </div>
+              {/* Top row on mobile */}
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                {/* Icon */}
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  <FileText size={18} className="text-muted-foreground" />
+                </div>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium truncate">{item.title}</h3>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
-                  <span className="flex items-center gap-1">
-                    <User size={12} />
-                    {item.author}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CalendarDays size={12} />
-                    {item.date}
-                  </span>
-                  <span>{item.blocks} blocks</span>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-sm sm:text-base truncate">{item.title}</h3>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-0.5">
+                    <span className="flex items-center gap-1">
+                      <User size={12} />
+                      {item.author}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <CalendarDays size={12} />
+                      {item.date}
+                    </span>
+                    <span className="hidden sm:inline">{item.blocks} blocks</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Tags */}
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 text-xs rounded-full border border-border bg-muted">
-                  {item.type}
-                </span>
-                {item.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 text-xs rounded-full border border-border bg-muted"
-                  >
-                    {tag}
+              {/* Bottom row on mobile, inline on desktop */}
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pl-13 sm:pl-0">
+                {/* Tags - Hidden on small mobile */}
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="px-2 py-0.5 text-xs rounded-full border border-border bg-muted">
+                    {item.type}
                   </span>
-                ))}
-              </div>
+                  {item.tags.slice(0, 1).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 text-xs rounded-full border border-border bg-muted hidden lg:inline"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
 
-              {/* Status Badge */}
-              <span
-                className={cn(
-                  'px-3 py-1 text-xs font-medium rounded-full border capitalize',
-                  getStatusBadge(item.status)
-                )}
-              >
-                {item.status}
-              </span>
+                {/* Status Badge */}
+                <span
+                  className={cn(
+                    'px-2.5 py-1 text-xs font-medium rounded-full border capitalize flex-shrink-0',
+                    getStatusBadge(item.status)
+                  )}
+                >
+                  {item.status}
+                </span>
 
-              {/* Actions */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-2 rounded-lg hover:bg-muted transition-colors">
-                  <Pencil size={16} className="text-muted-foreground" />
-                </button>
-                <button className="p-2 rounded-lg hover:bg-muted transition-colors">
-                  <Eye size={16} className="text-muted-foreground" />
-                </button>
-                <button className="p-2 rounded-lg hover:bg-muted transition-colors">
-                  <Trash2 size={16} className="text-muted-foreground" />
-                </button>
+                {/* Actions - Always visible on mobile, hover on desktop */}
+                <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <button 
+                    className="p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors"
+                    onClick={(e) => { e.stopPropagation(); onSelectContent(item.id); }}
+                  >
+                    <Pencil size={14} className="text-muted-foreground" />
+                  </button>
+                  <button 
+                    className="p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors hidden sm:block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Eye size={14} className="text-muted-foreground" />
+                  </button>
+                  <button 
+                    className="p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Trash2 size={14} className="text-muted-foreground" />
+                  </button>
+                </div>
               </div>
             </motion.div>
           ))}
