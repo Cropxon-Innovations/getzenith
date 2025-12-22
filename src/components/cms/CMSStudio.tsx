@@ -4,7 +4,7 @@ import { CMSLeftSidebar } from './CMSLeftSidebar';
 import { CMSEditorCanvas, CMSEditorCanvasHandle } from './CMSEditorCanvas';
 import { CMSRightPanel } from './CMSRightPanel';
 import { CMSBlockPickerPanel } from './CMSBlockPickerPanel';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -43,53 +43,31 @@ export const CMSStudio = () => {
     
     setContentItems(prev => [newContent, ...prev]);
     setSelectedContentId(newId);
-    toast.success('New content created', {
-      description: 'Start editing your new content item.'
-    });
+    toast.success('New content created');
   }, []);
 
   const handleInsertBlock = useCallback(async (blockId: string) => {
     if (editorRef.current) {
       await editorRef.current.insertBlock(blockId);
-      toast.success(`${blockId.charAt(0).toUpperCase() + blockId.slice(1)} block added`, {
-        description: 'Block inserted at cursor position.'
-      });
+      toast.success(`${blockId} block added`);
     }
   }, []);
-
-  const handleOpenBlockPicker = () => {
-    setIsBlockPickerOpen(true);
-  };
-
-  const handleCloseBlockPicker = () => {
-    setIsBlockPickerOpen(false);
-  };
 
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // ESC to close panel
       if (e.key === 'Escape' && isBlockPickerOpen) {
-        handleCloseBlockPicker();
-      }
-      // "/" to open panel when in editor
-      if (e.key === '/' && !isBlockPickerOpen && selectedContentId) {
-        // Only open if not already typing in an input
-        const target = e.target as HTMLElement;
-        if (!['INPUT', 'TEXTAREA'].includes(target.tagName) && !target.isContentEditable) {
-          e.preventDefault();
-          handleOpenBlockPicker();
-        }
+        setIsBlockPickerOpen(false);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isBlockPickerOpen, selectedContentId]);
+  }, [isBlockPickerOpen]);
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
-      {/* Left Sidebar - Content Library */}
+      {/* Left Sidebar */}
       <CMSLeftSidebar
         selectedContentId={selectedContentId}
         onSelectContent={setSelectedContentId}
@@ -97,28 +75,27 @@ export const CMSStudio = () => {
         contentItems={contentItems}
       />
 
-      {/* Center - Editor Canvas with Add Block Button */}
-      <div className="flex-1 flex flex-col relative">
+      {/* Center - Editor */}
+      <div className="flex-1 flex flex-col relative min-w-0">
         <CMSEditorCanvas
           ref={editorRef}
           contentId={selectedContentId}
           onDataChange={(data) => {
-            // Handle autosave
-            console.log('Content changed:', data);
+            console.log('Content saved:', data.blocks.length, 'blocks');
           }}
         />
 
-        {/* Floating Add Block Button */}
-        {selectedContentId && (
+        {/* Add Block Button */}
+        {selectedContentId && !isBlockPickerOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="absolute bottom-6 right-6 z-10"
           >
             <Button
-              onClick={handleOpenBlockPicker}
-              className="gap-2 shadow-lg"
+              onClick={() => setIsBlockPickerOpen(true)}
               size="sm"
+              className="gap-2 shadow-lg"
             >
               <Plus size={16} />
               Add Block
@@ -126,33 +103,33 @@ export const CMSStudio = () => {
           </motion.div>
         )}
 
-        {/* Editor canvas dimming when block picker is open */}
+        {/* Overlay when block picker is open */}
         <AnimatePresence>
           {isBlockPickerOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10"
-              onClick={handleCloseBlockPicker}
+              className="absolute inset-0 bg-background/40 backdrop-blur-[1px] z-10"
+              onClick={() => setIsBlockPickerOpen(false)}
             />
           )}
         </AnimatePresence>
       </div>
 
-      {/* Right Panel - Metadata & Settings (when block picker is closed) */}
-      {!isBlockPickerOpen ? (
+      {/* Right Panel */}
+      {isBlockPickerOpen ? (
+        <CMSBlockPickerPanel
+          isOpen={isBlockPickerOpen}
+          onClose={() => setIsBlockPickerOpen(false)}
+          onInsertBlock={handleInsertBlock}
+          userRole="tenant_admin"
+        />
+      ) : (
         <CMSRightPanel
           contentId={selectedContentId}
           previewDevice={previewDevice}
           onPreviewDeviceChange={setPreviewDevice}
-        />
-      ) : (
-        <CMSBlockPickerPanel
-          isOpen={isBlockPickerOpen}
-          onClose={handleCloseBlockPicker}
-          onInsertBlock={handleInsertBlock}
-          userRole="tenant_admin"
         />
       )}
     </div>
