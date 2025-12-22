@@ -15,6 +15,7 @@ import {
   Tablet,
   Monitor,
   Plus,
+  Image,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,11 +23,14 @@ import { CMSEditorCanvas, CMSEditorCanvasHandle } from './CMSEditorCanvas';
 import { CMSBlockPicker } from './CMSBlockPicker';
 import { CMSSettingsPanel } from './CMSSettingsPanel';
 import { CMSVersionHistory } from './CMSVersionHistory';
+import { CMSTemplatePanel } from './CMSTemplatePanel';
+import { CMSMediaLibrary } from './CMSMediaLibrary';
+import { BlockTemplate } from './templates/templateLibrary';
 import { toast } from 'sonner';
 
 type EditorTab = 'edit' | 'preview' | 'distribute' | 'settings';
 type PreviewDevice = 'mobile' | 'tablet' | 'desktop';
-type RightPanel = 'blocks' | 'settings' | 'history' | null;
+type RightPanel = 'blocks' | 'templates' | 'history' | null;
 
 interface CMSEditorViewProps {
   contentId: string;
@@ -37,6 +41,7 @@ export const CMSEditorView = ({ contentId, onBack }: CMSEditorViewProps) => {
   const [activeTab, setActiveTab] = useState<EditorTab>('edit');
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop');
   const [rightPanel, setRightPanel] = useState<RightPanel>(null);
+  const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
   const editorRef = useRef<CMSEditorCanvasHandle>(null);
 
   const contentTitle = contentId.startsWith('new') ? 'Untitled Content' : 'Getting Started Guide';
@@ -45,7 +50,17 @@ export const CMSEditorView = ({ contentId, onBack }: CMSEditorViewProps) => {
   const handleInsertBlock = useCallback(async (blockId: string) => {
     if (editorRef.current) {
       await editorRef.current.insertBlock(blockId);
-      toast.success(`${blockId} block added`);
+      toast.success('Block added');
+    }
+    setRightPanel(null);
+  }, []);
+
+  const handleInsertTemplate = useCallback(async (template: BlockTemplate) => {
+    if (editorRef.current) {
+      for (const block of template.blocks) {
+        await editorRef.current.insertBlock(block.type, block.data as Record<string, unknown>);
+      }
+      toast.success(`${template.name} template added`);
     }
     setRightPanel(null);
   }, []);
@@ -105,7 +120,16 @@ export const CMSEditorView = ({ contentId, onBack }: CMSEditorViewProps) => {
             variant="outline"
             size="sm"
             className="gap-2"
-            onClick={() => setRightPanel(rightPanel === 'blocks' ? null : 'blocks')}
+            onClick={() => setIsMediaLibraryOpen(true)}
+          >
+            <Image size={14} />
+            Media
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setRightPanel(rightPanel === 'templates' ? null : 'templates')}
           >
             <LayoutGrid size={14} />
             Templates
@@ -302,6 +326,12 @@ export const CMSEditorView = ({ contentId, onBack }: CMSEditorViewProps) => {
                   onClose={() => setRightPanel(null)}
                 />
               )}
+              {rightPanel === 'templates' && (
+                <CMSTemplatePanel
+                  onInsertTemplate={handleInsertTemplate}
+                  onClose={() => setRightPanel(null)}
+                />
+              )}
               {rightPanel === 'history' && (
                 <CMSVersionHistory
                   contentId={contentId}
@@ -313,6 +343,12 @@ export const CMSEditorView = ({ contentId, onBack }: CMSEditorViewProps) => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Media Library Modal */}
+      <CMSMediaLibrary
+        isOpen={isMediaLibraryOpen}
+        onClose={() => setIsMediaLibraryOpen(false)}
+      />
     </div>
   );
 };
