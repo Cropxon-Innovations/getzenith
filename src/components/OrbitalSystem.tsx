@@ -101,7 +101,7 @@ export const OrbitalSystem = () => {
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary group-hover:glow">
                   <item.icon size={22} className="text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-card/80 border border-border/50 text-xs font-medium text-foreground whitespace-nowrap">
                   {item.label}
                 </div>
               </div>
