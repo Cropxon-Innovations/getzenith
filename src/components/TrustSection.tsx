@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 const trustPoints = [
@@ -20,18 +20,34 @@ const systemZones = [
 
 export const TrustSection = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [animationPhase, setAnimationPhase] = useState(0);
   const [activeSignals, setActiveSignals] = useState<number[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Animation sequence
+  // Intersection observer for visibility
   useEffect(() => {
-    if (!isInView) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
     
-    let interval: NodeJS.Timeout;
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
+  // Animation sequence - persistent loop
+  useEffect(() => {
+    if (!isVisible) return;
     
     const startSequence = () => {
-      // Phase 1: Inbound signals (random nodes send to center)
+      // Phase 1: Inbound signals
       setAnimationPhase(1);
       const inbound = [0, 2, 4].sort(() => Math.random() - 0.5).slice(0, 2);
       setActiveSignals(inbound);
@@ -48,7 +64,7 @@ export const TrustSection = () => {
           setActiveSignals(outbound);
           
           setTimeout(() => {
-            // Phase 0: Idle
+            // Phase 0: Idle (but still visible)
             setAnimationPhase(0);
             setActiveSignals([]);
           }, 2000);
@@ -56,81 +72,90 @@ export const TrustSection = () => {
       }, 2000);
     };
     
-    // Initial delay then start
     const initialTimeout = setTimeout(() => {
       startSequence();
-      interval = setInterval(startSequence, 8000);
-    }, 1000);
+    }, 800);
+    
+    const interval = setInterval(startSequence, 8000);
     
     return () => {
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isInView]);
+  }, [isVisible]);
 
   const radius = 140;
   const centerX = 200;
   const centerY = 200;
 
   return (
-    <section id="enterprise" className="py-32 relative bg-background overflow-hidden" ref={ref}>
-      {/* Subtle grid background */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
-                          linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-        backgroundSize: '50px 50px'
-      }} />
+    <section id="enterprise" className="py-24 sm:py-32 relative bg-background overflow-hidden" ref={ref}>
+      {/* Ambient grid background - persistent */}
+      <motion.div 
+        animate={{ opacity: [0.02, 0.04, 0.02] }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-0" 
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
+                            linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }} 
+      />
       
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
-          {/* Left: Copy + Trust Signals (40%) */}
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="grid lg:grid-cols-5 gap-8 lg:gap-16 items-center">
+          {/* Left: Copy + Trust Signals (40%) - animate once and stay */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="lg:col-span-2"
           >
-            <span className="text-sm uppercase tracking-[0.2em] text-muted-foreground font-medium">
+            <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-muted-foreground font-medium">
               Open & Enterprise-Safe
             </span>
             
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 mb-6 leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-4 sm:mb-6 leading-tight">
               Built to Scale{' '}
               <span className="text-gradient">Without Lock-In</span>
             </h2>
 
-            <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground mb-8 sm:mb-10 leading-relaxed">
               Your data, your infrastructure, your choice.
               <br />
               Zenith stays central while you stay in control.
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {trustPoints.map((point, index) => (
                 <motion.div
                   key={point}
                   initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
                   className="flex items-center gap-3 text-muted-foreground"
                 >
-                  <div className="w-5 h-5 rounded-full border border-primary/40 flex items-center justify-center flex-shrink-0">
+                  <motion.div 
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                    className="w-5 h-5 rounded-full border border-primary/40 flex items-center justify-center flex-shrink-0"
+                  >
                     <Check size={12} className="text-primary" />
-                  </div>
-                  <span className="text-sm">{point}</span>
+                  </motion.div>
+                  <span className="text-xs sm:text-sm">{point}</span>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* Right: Architectural Animation (60%) */}
+          {/* Right: Architectural Animation (60%) - always visible with persistent idle */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
             className="lg:col-span-3 relative"
           >
-            <div className="relative aspect-square max-w-[450px] mx-auto">
+            <div className="relative aspect-square max-w-[400px] sm:max-w-[450px] mx-auto">
               <svg 
                 viewBox="0 0 400 400" 
                 className="w-full h-full"
@@ -150,7 +175,7 @@ export const TrustSection = () => {
                   </filter>
                 </defs>
 
-                {/* Orbital rings */}
+                {/* Orbital rings - persistent with slow rotation */}
                 {[140, 100, 60].map((r, i) => (
                   <motion.circle
                     key={r}
@@ -161,13 +186,20 @@ export const TrustSection = () => {
                     stroke="hsl(var(--border))"
                     strokeWidth="1"
                     strokeDasharray="6 6"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={isInView ? { opacity: 0.5 - i * 0.15, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                    transition={{ delay: 0.3 + i * 0.15, duration: 0.8 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: 0.4 - i * 0.1,
+                      rotate: i % 2 === 0 ? 360 : -360
+                    }}
+                    transition={{ 
+                      opacity: { duration: 0.8, delay: 0.3 + i * 0.15 },
+                      rotate: { duration: 60 + i * 20, repeat: Infinity, ease: 'linear' }
+                    }}
+                    style={{ transformOrigin: `${centerX}px ${centerY}px` }}
                   />
                 ))}
 
-                {/* Connection lines to each zone */}
+                {/* Connection lines - always visible */}
                 {systemZones.map((zone, index) => {
                   const angleRad = zone.angle * (Math.PI / 180);
                   const endX = centerX + Math.cos(angleRad) * radius;
@@ -182,14 +214,14 @@ export const TrustSection = () => {
                       y2={endY}
                       stroke="hsl(var(--border))"
                       strokeWidth="1.5"
-                      initial={{ pathLength: 0, opacity: 0 }}
-                      animate={isInView ? { pathLength: 1, opacity: 0.4 } : { pathLength: 0, opacity: 0 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.4 }}
                       transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
                     />
                   );
                 })}
 
-                {/* Event pulse signals */}
+                {/* Event pulse signals - visible during animation phases */}
                 <AnimatePresence>
                   {systemZones.map((zone, index) => {
                     const angleRad = zone.angle * (Math.PI / 180);
@@ -201,36 +233,23 @@ export const TrustSection = () => {
                     
                     return (
                       <motion.g key={`pulse-${zone.id}-${animationPhase}`}>
-                        {/* Inbound pulse */}
                         {animationPhase === 1 && (
                           <motion.circle
                             r="6"
                             fill="hsl(var(--primary))"
                             filter="url(#glow)"
-                            initial={{ cx: endX, cy: endY, opacity: 1, scale: 1 }}
-                            animate={{ 
-                              cx: centerX, 
-                              cy: centerY, 
-                              opacity: [1, 1, 0],
-                              scale: [1, 1.2, 0.5]
-                            }}
+                            initial={{ cx: endX, cy: endY, opacity: 1 }}
+                            animate={{ cx: centerX, cy: centerY, opacity: [1, 1, 0] }}
                             transition={{ duration: 1.5, ease: 'easeInOut' }}
                           />
                         )}
-                        
-                        {/* Outbound pulse */}
                         {animationPhase === 3 && (
                           <motion.circle
                             r="6"
                             fill="hsl(var(--primary))"
                             filter="url(#glow)"
-                            initial={{ cx: centerX, cy: centerY, opacity: 1, scale: 0.5 }}
-                            animate={{ 
-                              cx: endX, 
-                              cy: endY, 
-                              opacity: [1, 1, 0],
-                              scale: [0.5, 1.2, 1]
-                            }}
+                            initial={{ cx: centerX, cy: centerY, opacity: 1 }}
+                            animate={{ cx: endX, cy: endY, opacity: [1, 1, 0] }}
                             transition={{ duration: 1.5, ease: 'easeInOut' }}
                           />
                         )}
@@ -239,32 +258,27 @@ export const TrustSection = () => {
                   })}
                 </AnimatePresence>
 
-                {/* Center Zenith node */}
+                {/* Center Zenith node - always visible with persistent glow */}
                 <motion.g
                   initial={{ scale: 0, opacity: 0 }}
-                  animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.4, duration: 0.5, type: 'spring' }}
                 >
-                  {/* Processing glow */}
-                  <AnimatePresence>
-                    {animationPhase === 2 && (
-                      <motion.circle
-                        cx={centerX}
-                        cy={centerY}
-                        r="45"
-                        fill="none"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth="2"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ 
-                          opacity: [0, 0.6, 0],
-                          scale: [0.8, 1.3, 1.5]
-                        }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.2, ease: 'easeOut' }}
-                      />
-                    )}
-                  </AnimatePresence>
+                  {/* Processing glow - persistent subtle pulse */}
+                  <motion.circle
+                    cx={centerX}
+                    cy={centerY}
+                    r="50"
+                    fill="none"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="1"
+                    animate={{ 
+                      opacity: animationPhase === 2 ? [0.3, 0.6, 0.3] : [0.1, 0.2, 0.1],
+                      scale: animationPhase === 2 ? [1, 1.2, 1] : [1, 1.05, 1]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ transformOrigin: `${centerX}px ${centerY}px` }}
+                  />
                   
                   {/* Main center circle */}
                   <motion.circle
@@ -274,9 +288,7 @@ export const TrustSection = () => {
                     fill="hsl(var(--card))"
                     stroke={animationPhase === 2 ? "hsl(var(--primary))" : "hsl(var(--border))"}
                     strokeWidth="2"
-                    animate={{ 
-                      strokeWidth: animationPhase === 2 ? 3 : 2,
-                    }}
+                    animate={{ strokeWidth: animationPhase === 2 ? 3 : 2 }}
                     transition={{ duration: 0.3 }}
                   />
                   
@@ -291,7 +303,7 @@ export const TrustSection = () => {
                   </text>
                 </motion.g>
 
-                {/* External system nodes */}
+                {/* External system nodes - always visible */}
                 {systemZones.map((zone, index) => {
                   const angleRad = zone.angle * (Math.PI / 180);
                   const x = centerX + Math.cos(angleRad) * radius;
@@ -302,14 +314,14 @@ export const TrustSection = () => {
                     <motion.g
                       key={zone.id}
                       initial={{ opacity: 0, scale: 0 }}
-                      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.8 + index * 0.1, duration: 0.4 }}
                     >
                       <motion.rect
-                        x={x - 55}
-                        y={y - 14}
-                        width="110"
-                        height="28"
+                        x={x - 50}
+                        y={y - 12}
+                        width="100"
+                        height="24"
                         rx="6"
                         fill="hsl(var(--secondary))"
                         stroke={isActive ? "hsl(var(--primary))" : "hsl(var(--border))"}
@@ -325,7 +337,7 @@ export const TrustSection = () => {
                         y={y}
                         textAnchor="middle"
                         dominantBaseline="middle"
-                        className="text-xs fill-muted-foreground"
+                        className="text-[10px] sm:text-xs fill-muted-foreground"
                       >
                         {zone.label}
                       </text>
@@ -334,10 +346,10 @@ export const TrustSection = () => {
                 })}
               </svg>
               
-              {/* Status indicator */}
+              {/* Status indicator - always visible */}
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 1.5 }}
                 className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xs text-muted-foreground"
               >
@@ -347,13 +359,15 @@ export const TrustSection = () => {
                       ? 'hsl(var(--primary))' 
                       : animationPhase > 0 
                         ? 'hsl(142 76% 36%)' 
-                        : 'hsl(var(--muted-foreground))'
+                        : 'hsl(var(--muted-foreground))',
+                    scale: [1, 1.2, 1]
                   }}
+                  transition={{ scale: { duration: 2, repeat: Infinity } }}
                   className="w-2 h-2 rounded-full"
                 />
                 <span>
                   {animationPhase === 0 && 'Idle'}
-                  {animationPhase === 1 && 'Receiving events...'}
+                  {animationPhase === 1 && 'Receiving...'}
                   {animationPhase === 2 && 'Processing...'}
                   {animationPhase === 3 && 'Dispatching...'}
                 </span>
@@ -362,20 +376,19 @@ export const TrustSection = () => {
           </motion.div>
         </div>
 
-        {/* Live Dashboard Preview */}
+        {/* Live Dashboard Preview - always visible after animation */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8 }}
-          className="mt-20"
+          className="mt-16 sm:mt-20"
         >
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <DashboardCard
               title="API Events"
               value={12847}
               subtitle="Last 24 hours"
               trend="+12%"
-              isInView={isInView}
               delay={1.3}
             />
             <DashboardCard
@@ -385,7 +398,6 @@ export const TrustSection = () => {
               subtitle="Success rate"
               trend="Healthy"
               status="green"
-              isInView={isInView}
               delay={1.4}
             />
             <DashboardCard
@@ -395,7 +407,6 @@ export const TrustSection = () => {
               subtitle="Connected"
               trend="All systems"
               status="green"
-              isInView={isInView}
               delay={1.5}
             />
             <DashboardCard
@@ -404,7 +415,6 @@ export const TrustSection = () => {
               subtitle="All regions"
               trend="99.99% uptime"
               status="green"
-              isInView={isInView}
               delay={1.6}
             />
           </div>
@@ -421,16 +431,21 @@ interface DashboardCardProps {
   subtitle: string;
   trend: string;
   status?: 'green' | 'amber';
-  isInView: boolean;
   delay: number;
 }
 
-const DashboardCard = ({ title, value, suffix = '', subtitle, trend, status, isInView, delay }: DashboardCardProps) => {
+const DashboardCard = ({ title, value, suffix = '', subtitle, trend, status, delay }: DashboardCardProps) => {
   const [displayValue, setDisplayValue] = useState(typeof value === 'number' ? 0 : value);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setHasAnimated(true), delay * 1000);
+    return () => clearTimeout(timer);
+  }, [delay]);
   
   // Animate number counting up
   useEffect(() => {
-    if (!isInView || typeof value !== 'number') return;
+    if (!hasAnimated || typeof value !== 'number') return;
     
     const duration = 1500;
     const steps = 30;
@@ -450,11 +465,11 @@ const DashboardCard = ({ title, value, suffix = '', subtitle, trend, status, isI
     }, duration / steps);
     
     return () => clearInterval(timer);
-  }, [isInView, value]);
+  }, [hasAnimated, value]);
 
-  // Subtle random updates for realism
+  // Subtle random updates for realism - persistent
   useEffect(() => {
-    if (!isInView || typeof value !== 'number' || value < 100) return;
+    if (!hasAnimated || typeof value !== 'number' || value < 100) return;
     
     const interval = setInterval(() => {
       const variation = Math.floor(Math.random() * 50) - 25;
@@ -467,48 +482,43 @@ const DashboardCard = ({ title, value, suffix = '', subtitle, trend, status, isI
     }, 4000);
     
     return () => clearInterval(interval);
-  }, [isInView, value]);
+  }, [hasAnimated, value]);
 
-  const formattedValue = typeof displayValue === 'number' 
-    ? displayValue.toLocaleString() 
-    : displayValue;
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="p-5 rounded-xl bg-card border border-border"
+      className="bg-card border border-border rounded-xl p-4 sm:p-5"
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-muted-foreground uppercase tracking-wide">{title}</span>
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <span className="text-xs sm:text-sm text-muted-foreground">{title}</span>
         {status && (
           <motion.div 
             animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className={`w-2 h-2 rounded-full ${status === 'green' ? 'bg-green-500' : 'bg-yellow-500'}`} 
+            className={`w-2 h-2 rounded-full ${status === 'green' ? 'bg-green-500' : 'bg-amber-500'}`} 
           />
         )}
       </div>
-      <div className="text-2xl font-semibold mb-1">
-        {formattedValue}{suffix}
+      <div className="text-xl sm:text-2xl font-bold text-foreground mb-1">
+        {typeof displayValue === 'number' ? displayValue.toLocaleString() : displayValue}
+        {suffix && <span className="text-base sm:text-lg text-muted-foreground">{suffix}</span>}
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{subtitle}</span>
-        <span className={`text-xs ${status === 'green' ? 'text-green-500' : 'text-muted-foreground'}`}>
-          {trend}
-        </span>
+        <span className="text-[10px] sm:text-xs text-muted-foreground">{subtitle}</span>
+        <span className="text-[10px] sm:text-xs text-primary">{trend}</span>
       </div>
       
-      {/* Mini activity chart */}
-      <div className="mt-3 h-8 flex items-end gap-0.5">
-        {Array.from({ length: 16 }).map((_, i) => (
+      {/* Mini sparkline - persistent */}
+      <div className="mt-2 sm:mt-3 flex items-end gap-0.5 h-4 sm:h-6">
+        {[30, 45, 35, 60, 50, 70, 55, 80, 65, 75].map((h, i) => (
           <motion.div
             key={i}
-            initial={{ height: 0 }}
-            animate={isInView ? { height: `${15 + Math.random() * 85}%` } : { height: 0 }}
-            transition={{ delay: delay + 0.3 + i * 0.03, duration: 0.4 }}
-            className="flex-1 bg-primary/15 rounded-sm"
+            animate={{ height: [`${h * 0.8}%`, `${h}%`, `${h * 0.9}%`] }}
+            transition={{ duration: 3, repeat: Infinity, delay: i * 0.2 }}
+            className="flex-1 bg-primary/30 rounded-sm"
+            style={{ height: `${h}%` }}
           />
         ))}
       </div>
