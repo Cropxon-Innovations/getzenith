@@ -360,11 +360,22 @@ export const CMSEditorCanvas = forwardRef<CMSEditorCanvasHandle, CMSEditorCanvas
 
     // Reinitialize when content changes
     useEffect(() => {
-      if (contentId && editorRef.current && isReady) {
-        // In a real app, fetch content by ID and render it
-        const content = contentId === 'new' ? emptyContent : dummyContent;
-        editorRef.current.render(content);
-      }
+      const renderContent = async () => {
+        if (contentId && editorRef.current && isReady) {
+          try {
+            // Wait for editor to be ready
+            await editorRef.current.isReady;
+            // In a real app, fetch content by ID and render it
+            const content = contentId.startsWith('new') ? emptyContent : dummyContent;
+            if (editorRef.current.render) {
+              await editorRef.current.render(content);
+            }
+          } catch (error) {
+            console.error('Failed to render content:', error);
+          }
+        }
+      };
+      renderContent();
     }, [contentId, isReady]);
 
     if (!contentId) {
