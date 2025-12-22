@@ -7,9 +7,15 @@ interface Particle {
   speedX: number;
   speedY: number;
   opacity: number;
+  pulsePhase: number;
 }
 
-export const ParticleBackground = () => {
+interface ParticleBackgroundProps {
+  density?: number;
+  className?: string;
+}
+
+export const ParticleBackground = ({ density = 15000, className = '' }: ParticleBackgroundProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -29,28 +35,42 @@ export const ParticleBackground = () => {
 
     const createParticles = () => {
       particles = [];
-      const particleCount = Math.floor((canvas.width * canvas.height) / 15000);
+      const particleCount = Math.floor((canvas.width * canvas.height) / density);
       
       for (let i = 0; i < particleCount; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 2 + 0.5,
-          speedX: (Math.random() - 0.5) * 0.3,
-          speedY: (Math.random() - 0.5) * 0.3,
-          opacity: Math.random() * 0.5 + 0.1,
+          size: Math.random() * 2.5 + 0.5,
+          speedX: (Math.random() - 0.5) * 0.4,
+          speedY: (Math.random() - 0.5) * 0.4,
+          opacity: Math.random() * 0.6 + 0.1,
+          pulsePhase: Math.random() * Math.PI * 2,
         });
       }
     };
 
+    let time = 0;
     const drawParticles = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time += 0.02;
 
       particles.forEach((particle) => {
+        // Pulsing opacity effect
+        const pulseOpacity = particle.opacity * (0.7 + 0.3 * Math.sin(time + particle.pulsePhase));
+        
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(var(--primary), ${particle.opacity})`;
+        ctx.fillStyle = `hsla(var(--primary), ${pulseOpacity})`;
         ctx.fill();
+
+        // Add subtle glow for larger particles
+        if (particle.size > 1.5) {
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size * 2, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(var(--primary), ${pulseOpacity * 0.2})`;
+          ctx.fill();
+        }
 
         // Update position
         particle.x += particle.speedX;
@@ -70,22 +90,24 @@ export const ParticleBackground = () => {
     createParticles();
     drawParticles();
 
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       resizeCanvas();
       createParticles();
-    });
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [density]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.6 }}
+      className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
+      style={{ opacity: 0.7 }}
     />
   );
 };
