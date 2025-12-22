@@ -1,19 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type ThemeName = 
-  | 'theme-light-minimal'
-  | 'theme-dark-pro'
-  | 'theme-enterprise-blue'
-  | 'theme-calm-neutral'
-  | 'theme-executive-grey'
-  | 'theme-high-contrast'
-  | 'theme-custom-brand';
+  | 'theme-light'
+  | 'theme-dark'
+  | 'theme-enterprise'
+  | 'theme-high-contrast';
 
 export interface ThemeDefinition {
   id: ThemeName;
   name: string;
   description: string;
-  category: 'light' | 'dark' | 'brand';
+  category: 'light' | 'dark';
   preview: {
     background: string;
     sidebar: string;
@@ -27,39 +24,39 @@ export interface ThemeDefinition {
 
 export const themes: ThemeDefinition[] = [
   {
-    id: 'theme-light-minimal',
-    name: 'Light Minimal',
-    description: 'Clean, airy, modern — ideal for startups and content-heavy businesses',
+    id: 'theme-light',
+    name: 'Light',
+    description: 'Clean, modern, and professional',
     category: 'light',
     preview: {
       background: '#FAFAFA',
       sidebar: '#F5F5F5',
       card: '#FFFFFF',
-      accent: '#3B82F6',
-      text: '#1A1A1A',
-      muted: '#A3A3A3',
+      accent: '#2563EB',
+      text: '#171717',
+      muted: '#737373',
       border: '#E5E5E5',
     },
   },
   {
-    id: 'theme-dark-pro',
-    name: 'Dark Pro',
-    description: 'Professional, focused — perfect for SaaS, dev tools, and enterprises',
+    id: 'theme-dark',
+    name: 'Dark',
+    description: 'Focused, modern, and elegant',
     category: 'dark',
     preview: {
       background: '#0A0A0B',
       sidebar: '#111113',
       card: '#18181B',
-      accent: '#8B5CF6',
+      accent: '#3B82F6',
       text: '#FAFAFA',
       muted: '#71717A',
       border: '#27272A',
     },
   },
   {
-    id: 'theme-enterprise-blue',
-    name: 'Enterprise Blue',
-    description: 'Corporate trust & scale — for regulated industries and large organizations',
+    id: 'theme-enterprise',
+    name: 'Enterprise',
+    description: 'Corporate trust and scale',
     category: 'dark',
     preview: {
       background: '#0F172A',
@@ -72,63 +69,18 @@ export const themes: ThemeDefinition[] = [
     },
   },
   {
-    id: 'theme-calm-neutral',
-    name: 'Calm Neutral',
-    description: 'Warm, human, welcoming — for education, communities, and internal teams',
-    category: 'light',
-    preview: {
-      background: '#FAF9F7',
-      sidebar: '#F5F3F0',
-      card: '#FFFFFF',
-      accent: '#78716C',
-      text: '#1C1917',
-      muted: '#A8A29E',
-      border: '#E7E5E4',
-    },
-  },
-  {
-    id: 'theme-executive-grey',
-    name: 'Executive Grey',
-    description: 'Sophisticated & understated — for leadership portals and analytics views',
-    category: 'dark',
-    preview: {
-      background: '#18181B',
-      sidebar: '#1F1F23',
-      card: '#27272A',
-      accent: '#A1A1AA',
-      text: '#FAFAFA',
-      muted: '#52525B',
-      border: '#3F3F46',
-    },
-  },
-  {
     id: 'theme-high-contrast',
     name: 'High Contrast',
-    description: 'Maximum readability — WCAG-compliant for accessibility-first environments',
+    description: 'Maximum accessibility and readability',
     category: 'light',
     preview: {
       background: '#FFFFFF',
-      sidebar: '#F0F0F0',
+      sidebar: '#F5F5F5',
       card: '#FFFFFF',
-      accent: '#000000',
+      accent: '#1D4ED8',
       text: '#000000',
       muted: '#525252',
-      border: '#000000',
-    },
-  },
-  {
-    id: 'theme-custom-brand',
-    name: 'Custom Brand',
-    description: 'Your brand identity — derived from your logo and brand guidelines',
-    category: 'brand',
-    preview: {
-      background: '#0D0D12',
-      sidebar: '#13131A',
-      card: '#1A1A24',
-      accent: '#A855F7',
-      text: '#F5F5F5',
-      muted: '#6B6B80',
-      border: '#2A2A3C',
+      border: '#171717',
     },
   },
 ];
@@ -142,7 +94,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<ThemeName>('theme-dark-pro');
+  const [theme, setTheme] = useState<ThemeName>('theme-dark');
 
   const currentTheme = themes.find(t => t.id === theme) || themes[1];
 
