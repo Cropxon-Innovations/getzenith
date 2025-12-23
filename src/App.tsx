@@ -40,6 +40,7 @@ import Billing from "./pages/admin/Billing";
 import Notifications from "./pages/admin/Notifications";
 import Messaging from "./pages/admin/Messaging";
 import Meetings from "./pages/admin/Meetings";
+import MeetingRoom from "./pages/MeetingRoom";
 
 // Studio
 import Studio from "./pages/Studio";
@@ -89,6 +90,9 @@ const AnimatedRoutes = () => {
         <Route path="/admin/messaging" element={<PageTransition><Messaging /></PageTransition>} />
         <Route path="/admin/meetings" element={<PageTransition><Meetings /></PageTransition>} />
         <Route path="/admin/growth" element={<PageTransition><Analytics /></PageTransition>} />
+        
+        {/* Meeting Room */}
+        <Route path="/meet/:meetingId" element={<PageTransition><MeetingRoom /></PageTransition>} />
         
         {/* Studio Routes */}
         <Route path="/studio/:studioType" element={<PageTransition><Studio /></PageTransition>} />
