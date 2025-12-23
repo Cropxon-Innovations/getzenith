@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Loader2, ArrowRight, Building2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight, Building2, Shield, Users, Zap, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ZenithLogo } from '@/components/ZenithLogo';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Separator } from '@/components/ui/separator';
 
 const signUpSchema = z.object({
@@ -32,21 +33,22 @@ interface SocialButtonProps {
 }
 
 const SocialButton = ({ icon, label, onClick, disabled, comingSoon }: SocialButtonProps) => (
-  <Button
+  <motion.button
     type="button"
-    variant="outline"
-    className="w-full h-11 gap-3 relative group"
     onClick={onClick}
     disabled={disabled || comingSoon}
+    whileHover={{ scale: comingSoon ? 1 : 1.01 }}
+    whileTap={{ scale: comingSoon ? 1 : 0.99 }}
+    className="w-full h-12 px-4 rounded-xl border border-border bg-card hover:bg-secondary/50 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-colors relative group"
   >
-    {icon}
-    <span className="text-sm">{label}</span>
+    <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
+    <span className="text-sm font-medium text-foreground">{label}</span>
     {comingSoon && (
-      <span className="absolute right-2 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+      <span className="absolute right-3 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
         Soon
       </span>
     )}
-  </Button>
+  </motion.button>
 );
 
 // Brand icons as SVG components
@@ -75,10 +77,16 @@ const GitHubIcon = () => (
 );
 
 const CropXonIcon = () => (
-  <div className="w-[18px] h-[18px] rounded bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center">
     <span className="text-[10px] font-bold text-primary-foreground">C</span>
   </div>
 );
+
+const features = [
+  { icon: Shield, text: 'Enterprise-grade security' },
+  { icon: Users, text: 'Multi-tenant architecture' },
+  { icon: Zap, text: 'AI-powered automation' },
+];
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(true);
@@ -161,179 +169,285 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
+          className="h-16 flex items-center justify-between px-4 sm:px-8"
         >
-          <div className="mb-8 text-center">
-            <ZenithLogo size={48} className="mx-auto mb-6" />
-            <h1 className="text-2xl font-bold text-foreground">
-              {isSignUp ? 'Create your account' : 'Welcome back'}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {isSignUp
-                ? 'Start building your business platform'
-                : 'Sign in to continue to your dashboard'}
-            </p>
-          </div>
+          <Link to="/" className="flex items-center gap-2 group">
+            <ZenithLogo size={32} />
+            <span className="font-bold text-foreground group-hover:text-primary transition-colors">Zenith</span>
+          </Link>
+          <ThemeSwitcher />
+        </motion.header>
 
-          {/* Social Login Buttons */}
-          <div className="space-y-3 mb-6">
-            <SocialButton 
-              icon={<GoogleIcon />} 
-              label="Continue with Google"
-              onClick={() => handleSocialLogin('Google')}
-            />
-            <SocialButton 
-              icon={<MicrosoftIcon />} 
-              label="Continue with Microsoft"
-              onClick={() => handleSocialLogin('Microsoft')}
-            />
-            <SocialButton 
-              icon={<GitHubIcon />} 
-              label="Continue with GitHub"
-              onClick={() => handleSocialLogin('GitHub')}
-            />
-            <SocialButton 
-              icon={<CropXonIcon />} 
-              label="CropXon One Auth"
-              comingSoon
-            />
-            
-            {/* Enterprise SSO */}
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full h-11 gap-3 text-muted-foreground hover:text-foreground"
-              onClick={() => handleSocialLogin('SSO')}
-            >
-              <Building2 size={18} />
-              <span className="text-sm">Enterprise SSO</span>
-              <ArrowRight size={14} className="ml-auto" />
-            </Button>
-          </div>
-
-          <div className="relative mb-6">
-            <Separator />
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-3 text-xs text-muted-foreground">
-              or continue with email
-            </span>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <AnimatePresence mode="wait">
-              {isSignUp && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    placeholder="John Doe"
-                    className="mt-1.5"
-                  />
-                  {errors.fullName && (
-                    <p className="text-sm text-destructive mt-1">{errors.fullName}</p>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="you@example.com"
-                className="mt-1.5"
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive mt-1">{errors.email}</p>
-              )}
+        {/* Form Container */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full max-w-md"
+          >
+            {/* Title */}
+            <div className="text-center mb-6">
+              <motion.h1 
+                key={isSignUp ? 'signup' : 'signin'}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-2xl sm:text-3xl font-bold text-foreground"
+              >
+                {isSignUp ? 'Create your account' : 'Welcome back'}
+              </motion.h1>
+              <p className="text-muted-foreground mt-2 text-sm">
+                {isSignUp
+                  ? 'Start your 30-day free trial'
+                  : 'Sign in to your dashboard'}
+              </p>
             </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative mt-1.5">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="••••••••"
-                  className="pr-10"
+            {/* Social Login Buttons */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15 }}
+              className="space-y-2.5 mb-5"
+            >
+              <div className="grid grid-cols-2 gap-2.5">
+                <SocialButton 
+                  icon={<GoogleIcon />} 
+                  label="Google"
+                  onClick={() => handleSocialLogin('Google')}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                <SocialButton 
+                  icon={<MicrosoftIcon />} 
+                  label="Microsoft"
+                  onClick={() => handleSocialLogin('Microsoft')}
+                />
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive mt-1">{errors.password}</p>
-              )}
+              <div className="grid grid-cols-2 gap-2.5">
+                <SocialButton 
+                  icon={<GitHubIcon />} 
+                  label="GitHub"
+                  onClick={() => handleSocialLogin('GitHub')}
+                />
+                <SocialButton 
+                  icon={<CropXonIcon />} 
+                  label="CropXon"
+                  comingSoon
+                />
+              </div>
+              
+              {/* Enterprise SSO */}
+              <SocialButton
+                icon={<Building2 size={18} className="text-muted-foreground" />}
+                label="Enterprise SSO"
+                onClick={() => handleSocialLogin('SSO')}
+              />
+            </motion.div>
+
+            {/* Divider */}
+            <div className="relative mb-5">
+              <Separator className="bg-border" />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-3 text-xs text-muted-foreground">
+                or continue with email
+              </span>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            {/* Form */}
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className="space-y-3.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
             >
-              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-            </button>
-          </div>
-        </motion.div>
+              <AnimatePresence mode="wait">
+                {isSignUp && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Label htmlFor="fullName" className="text-sm font-medium text-foreground">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      placeholder="John Doe"
+                      className="mt-1.5 h-11 bg-card border-border"
+                    />
+                    {errors.fullName && (
+                      <p className="text-xs text-destructive mt-1">{errors.fullName}</p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div>
+                <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="you@company.com"
+                  className="mt-1.5 h-11 bg-card border-border"
+                />
+                {errors.email && (
+                  <p className="text-xs text-destructive mt-1">{errors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password" className="text-sm font-medium text-foreground">Password</Label>
+                <div className="relative mt-1.5">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="••••••••"
+                    className="h-11 pr-10 bg-card border-border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive mt-1">{errors.password}</p>
+                )}
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {isSignUp ? 'Create Account' : 'Sign In'}
+                    <ArrowRight size={16} className="ml-2" />
+                  </>
+                )}
+              </Button>
+            </motion.form>
+
+            {/* Toggle */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="mt-5 text-center"
+            >
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+                <span className="font-medium text-primary">{isSignUp ? 'Sign in' : 'Sign up'}</span>
+              </button>
+            </motion.div>
+
+            {/* Terms */}
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              By continuing, you agree to our{' '}
+              <a href="#" className="underline hover:text-foreground">Terms of Service</a>
+              {' '}and{' '}
+              <a href="#" className="underline hover:text-foreground">Privacy Policy</a>
+            </p>
+          </motion.div>
+        </div>
       </div>
 
       {/* Right Panel - Visual */}
-      <div className="hidden lg:flex flex-1 bg-card border-l border-border items-center justify-center p-12">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="max-w-lg text-center"
-        >
-          <div className="w-64 h-64 mx-auto mb-8 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center relative overflow-hidden">
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent"
-              animate={{ x: ['-100%', '200%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+      <motion.div 
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        className="hidden lg:flex w-[500px] bg-card border-l border-border flex-col items-center justify-center p-10"
+      >
+        {/* Animated visual */}
+        <div className="relative mb-8">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.05, 1],
+              opacity: [0.5, 0.8, 0.5],
+            }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute -inset-8 bg-primary/20 rounded-full blur-3xl"
+          />
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+            className="w-48 h-48 rounded-full border border-dashed border-border relative"
+          >
+            <motion.div 
+              animate={{ rotate: -360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-4 rounded-full border border-primary/30"
             />
-            <div className="w-48 h-48 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-              <motion.div 
-                className="w-32 h-32 rounded-lg bg-gradient-to-br from-primary/40 to-primary/20"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-            </div>
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-3">
-            Your Business Operating System
-          </h2>
-          <p className="text-muted-foreground">
-            Zenith Studio understands your business and builds the system for you. 
-            No configuration needed.
-          </p>
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute inset-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center"
+            >
+              <ZenithLogo size={48} animated />
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Title */}
+        <h2 className="text-xl font-bold text-foreground text-center mb-2">
+          Your Business Operating System
+        </h2>
+        <p className="text-muted-foreground text-center text-sm mb-8 max-w-xs">
+          Everything you need to run your digital business from one unified platform.
+        </p>
+
+        {/* Features */}
+        <div className="space-y-3 w-full max-w-xs">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.text}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + index * 0.1 }}
+              className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border"
+            >
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <feature.icon size={16} className="text-primary" />
+              </div>
+              <span className="text-sm font-medium text-foreground">{feature.text}</span>
+              <CheckCircle2 size={14} className="text-green-500 ml-auto" />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Trust badge */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="mt-8 flex items-center gap-2 text-xs text-muted-foreground"
+        >
+          <Shield size={14} className="text-green-500" />
+          <span>SOC 2 Type II Certified</span>
+          <span className="mx-2">•</span>
+          <span>GDPR Compliant</span>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }

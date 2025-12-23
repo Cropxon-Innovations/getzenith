@@ -9,6 +9,8 @@ import { BusinessGoalStep } from '@/components/onboarding/steps/BusinessGoalStep
 import { AutoConfigStep } from '@/components/onboarding/steps/AutoConfigStep';
 import { BrandingStep } from '@/components/onboarding/steps/BrandingStep';
 import { FirstActionStep } from '@/components/onboarding/steps/FirstActionStep';
+import { ZenithLogo } from '@/components/ZenithLogo';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { supabase } from '@/integrations/supabase/client';
 
 export type BusinessType = 'education' | 'agency' | 'product' | 'enterprise' | 'exploring';
@@ -63,7 +65,6 @@ export default function Onboarding() {
     if (nextIndex < STEPS.length) {
       setCurrentStep(STEPS[nextIndex]);
     } else {
-      // Complete onboarding
       if (user) {
         await supabase.from('profiles').update({
           onboarding_completed: true
@@ -146,32 +147,52 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Progress Bar */}
-        <OnboardingProgress currentStep={stepIndex} totalSteps={STEPS.length} />
-        
-        {/* Step Content */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="w-full max-w-2xl"
-            >
-              {renderStep()}
-            </motion.div>
-          </AnimatePresence>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6"
+      >
+        <div className="flex items-center gap-3">
+          <ZenithLogo size={32} />
+          <span className="font-bold text-foreground">Zenith Studio</span>
         </div>
-      </div>
+        <ThemeSwitcher />
+      </motion.header>
 
-      {/* Preview Panel */}
-      <div className="hidden lg:block w-[480px] border-l border-border bg-card">
-        <OnboardingPreview state={state} currentStep={currentStep} />
+      <div className="flex-1 flex">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          {/* Progress Bar */}
+          <OnboardingProgress currentStep={stepIndex} totalSteps={STEPS.length} />
+          
+          {/* Step Content */}
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="w-full max-w-xl"
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Preview Panel */}
+        <motion.div 
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="hidden lg:block w-[450px] border-l border-border bg-card"
+        >
+          <OnboardingPreview state={state} currentStep={currentStep} />
+        </motion.div>
       </div>
     </div>
   );

@@ -41,7 +41,6 @@ export const Header = () => {
       >
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Logo */}
             <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
               <ZenithLogo size={36} animated={false} />
               <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
@@ -49,7 +48,6 @@ export const Header = () => {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => (
                 <a
@@ -63,7 +61,6 @@ export const Header = () => {
               ))}
             </nav>
 
-            {/* Right Actions */}
             <div className="hidden lg:flex items-center gap-2">
               <ThemeSwitcher />
               <Link to="/auth">
@@ -78,7 +75,6 @@ export const Header = () => {
               </Link>
             </div>
 
-            {/* Mobile Menu Toggle */}
             <div className="flex items-center gap-2 lg:hidden">
               <ThemeSwitcher />
               <button
@@ -93,7 +89,6 @@ export const Header = () => {
         </div>
       </motion.header>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
