@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Palette } from 'lucide-react';
-import { useTheme, themes, ThemeName } from '@/contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { ThemeSelector } from './ThemeSelector';
 import {
   Dialog,
@@ -10,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export const ThemeSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,23 +18,27 @@ export const ThemeSwitcher = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <button
-          className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-secondary transition-colors text-sm"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-2"
           aria-label="Open theme selector"
         >
-          {/* Mini preview dot */}
+          {/* Mini preview dot with gradient */}
           <div 
-            className="w-4 h-4 rounded-full border border-border"
-            style={{ backgroundColor: currentTheme.preview.accent }}
+            className="w-4 h-4 rounded-full ring-1 ring-border"
+            style={{ 
+              background: `linear-gradient(135deg, ${currentTheme.preview.accent} 0%, ${currentTheme.preview.background} 100%)` 
+            }}
           />
-          <span className="text-muted-foreground hidden sm:inline">
+          <span className="text-muted-foreground hidden sm:inline text-xs">
             {currentTheme.name}
           </span>
-          <Palette size={16} className="text-muted-foreground" />
-        </button>
+          <Palette size={14} className="text-muted-foreground" />
+        </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="sr-only">Theme Selector</DialogTitle>
         </DialogHeader>

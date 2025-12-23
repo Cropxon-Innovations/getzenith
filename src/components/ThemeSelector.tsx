@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, Sun, Moon, Waves, Sunset } from 'lucide-react';
 import { useTheme, themes, ThemeDefinition } from '@/contexts/ThemeContext';
 
 interface ThemeCardProps {
@@ -8,29 +8,50 @@ interface ThemeCardProps {
   onSelect: () => void;
 }
 
+const themeIcons: Record<string, React.ElementType> = {
+  'theme-light': Sun,
+  'theme-dark': Moon,
+  'theme-enterprise': Waves,
+  'theme-high-contrast': Sunset,
+};
+
 const ThemeCard = ({ theme, isSelected, onSelect }: ThemeCardProps) => {
   const { preview } = theme;
+  const Icon = themeIcons[theme.id] || Moon;
   
   return (
-    <button
+    <motion.button
       onClick={onSelect}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       className={`relative w-full text-left rounded-xl overflow-hidden transition-all duration-200 ${
         isSelected 
-          ? 'ring-2 ring-primary shadow-lg scale-[1.02]' 
-          : 'ring-1 ring-border hover:ring-primary/50 hover:scale-[1.01]'
+          ? 'ring-2 ring-primary shadow-lg' 
+          : 'ring-1 ring-border hover:ring-primary/50'
       }`}
     >
-      {/* Color Swatch Pill */}
+      {/* Color Swatch - Gradient based on theme */}
       <div 
-        className="h-8 w-full"
+        className="h-10 w-full flex items-center justify-center"
         style={{ 
           background: `linear-gradient(135deg, ${preview.accent} 0%, ${preview.background} 100%)` 
         }}
-      />
+      >
+        <Icon size={18} style={{ color: preview.text }} className="opacity-80" />
+      </div>
       
       {/* Theme Name */}
-      <div className="p-3 bg-card border-t border-border text-center">
-        <span className="text-sm font-medium text-foreground">
+      <div 
+        className="p-2.5 text-center border-t"
+        style={{ 
+          backgroundColor: preview.card,
+          borderColor: preview.border,
+        }}
+      >
+        <span 
+          className="text-sm font-medium"
+          style={{ color: preview.text }}
+        >
           {theme.name}
         </span>
       </div>
@@ -45,7 +66,7 @@ const ThemeCard = ({ theme, isSelected, onSelect }: ThemeCardProps) => {
           <Check size={12} className="text-primary-foreground" />
         </motion.div>
       )}
-    </button>
+    </motion.button>
   );
 };
 
@@ -53,7 +74,7 @@ export const ThemeSelector = () => {
   const { theme, setTheme } = useTheme();
   
   return (
-    <div className="w-full max-w-sm mx-auto">
+    <div className="w-full max-w-xs mx-auto">
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-foreground mb-1">
           Theme
