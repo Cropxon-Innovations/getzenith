@@ -256,35 +256,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Recent Activity */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Recent Activity</CardTitle>
-                  <Button variant="ghost" size="sm" className="text-xs">View All</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <motion.div
-                      key={activity.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      className="flex items-center gap-3"
-                    >
-                      <div className={`w-8 h-8 rounded-full bg-muted flex items-center justify-center`}>
-                        <activity.icon size={14} className={activity.color} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                        <p className="text-xs text-muted-foreground">{activity.time}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <RecentActivityList activities={recentActivity} />
           </div>
 
           {/* Sidebar */}
