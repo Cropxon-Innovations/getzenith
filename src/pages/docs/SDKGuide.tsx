@@ -10,6 +10,7 @@ import { Footer } from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { CodePlayground } from '@/components/docs/CodePlayground';
+import { SyntaxHighlighter } from '@/components/docs/SyntaxHighlighter';
 
 const sdks = [
   { 
@@ -282,21 +283,13 @@ const SDKGuide = () => {
                   {copiedCode === 'example' ? 'Copied!' : 'Copy'}
                 </button>
               </div>
-              <pre className="p-4 overflow-x-auto text-sm">
-                <code className="text-muted-foreground">
-                  {currentSDK.example.split('\n').map((line, i) => (
-                    <div key={i} className="leading-relaxed">
-                      <span className="text-muted-foreground/40 mr-4 select-none">{String(i + 1).padStart(2, '0')}</span>
-                      <span dangerouslySetInnerHTML={{ 
-                        __html: line
-                          .replace(/(import|from|const|await|new|async|def|class|require)/g, '<span class="text-primary">$1</span>')
-                          .replace(/('.*?'|".*?")/g, '<span class="text-green-400">$1</span>')
-                          .replace(/(\/\/.*|#.*)/g, '<span class="text-muted-foreground/60">$1</span>')
-                      }} />
-                    </div>
-                  ))}
-                </code>
-              </pre>
+              <div className="p-4 overflow-x-auto">
+                <SyntaxHighlighter 
+                  code={currentSDK.example} 
+                  language={activeSDK === 'Python' ? 'javascript' : 'typescript'} 
+                  showLineNumbers={true} 
+                />
+              </div>
             </motion.div>
 
             {/* Interactive Playground */}
