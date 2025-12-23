@@ -327,10 +327,12 @@ const Docs = () => {
                     ))}
                   </div>
 
-                  <Button className="gap-2">
-                    View SDK Documentation
-                    <ArrowRight size={16} />
-                  </Button>
+                  <Link to="/docs/sdk">
+                    <Button className="gap-2">
+                      View SDK Documentation
+                      <ArrowRight size={16} />
+                    </Button>
+                  </Link>
                 </motion.div>
 
                 {/* Code block */}
@@ -590,14 +592,18 @@ const Docs = () => {
                   Explore our documentation and start building with Zenith today.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Button size="lg" className="gap-2">
-                    <Play size={16} />
-                    Quick Start Guide
-                  </Button>
-                  <Button size="lg" variant="outline" className="gap-2">
-                    <ExternalLink size={16} />
-                    API Reference
-                  </Button>
+                  <Link to="/docs/getting-started">
+                    <Button size="lg" className="gap-2">
+                      <Play size={16} />
+                      Quick Start Guide
+                    </Button>
+                  </Link>
+                  <Link to="/docs/api-reference">
+                    <Button size="lg" variant="outline" className="gap-2">
+                      <ExternalLink size={16} />
+                      API Reference
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
             </div>
