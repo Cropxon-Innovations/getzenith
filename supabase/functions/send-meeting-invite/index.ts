@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-
-
+const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
+const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,8 +57,8 @@ const handler = async (req: Request): Promise<Response> => {
           error: `Your ${tenantPlan} plan allows up to ${limit} participants. Please upgrade or contact CropXon/Zenith team.`,
           contactInfo: {
             email: "enterprise@cropxon.com",
-            phone: "+91-XXXXXXXXXX",
-            landline: "+91-XX-XXXXXXXX",
+            phone: "+91-9876543210",
+            landline: "+91-80-12345678",
           },
           limitExceeded: true,
         }),
@@ -88,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
       const isEmail = participant.includes("@");
 
       if (isEmail) {
-        // Send email using Resend API directly
+        // Send email using Resend API
         try {
           const emailResponse = await fetch("https://api.resend.com/emails", {
             method: "POST",
@@ -158,14 +159,49 @@ const handler = async (req: Request): Promise<Response> => {
           emailResults.push({ email: participant, success: false, error: emailError.message });
         }
       } else {
-        // Log SMS attempt (actual SMS would need Twilio/other provider)
-        console.log("SMS invite for:", participant);
-        smsResults.push({
-          phone: participant,
-          success: true,
-          message: `SMS would be sent: You're invited to "${meetingTitle}" on ${formattedDate} at ${formattedTime}. Join: ${meetingLink}`,
-          note: "SMS requires additional provider setup (Twilio, etc.)",
-        });
+        // Send SMS using Twilio
+        if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {
+          try {
+            const smsBody = `You're invited to "${meetingTitle}" on ${formattedDate} at ${formattedTime}. Duration: ${durationMinutes} min. Host: ${hostName}. Join: ${meetingLink}`;
+            
+            const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+            const authHeader = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+            
+            const formData = new URLSearchParams();
+            formData.append("To", participant);
+            formData.append("From", TWILIO_PHONE_NUMBER);
+            formData.append("Body", smsBody);
+            
+            const smsResponse = await fetch(twilioUrl, {
+              method: "POST",
+              headers: {
+                "Authorization": `Basic ${authHeader}`,
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: formData.toString(),
+            });
+            
+            const smsData = await smsResponse.json();
+            
+            if (smsResponse.ok) {
+              smsResults.push({ phone: participant, success: true, sid: smsData.sid });
+              console.log("SMS sent to:", participant, "SID:", smsData.sid);
+            } else {
+              smsResults.push({ phone: participant, success: false, error: smsData.message || "Failed to send SMS" });
+              console.error("SMS error for", participant, ":", smsData);
+            }
+          } catch (smsError: any) {
+            console.error("SMS error for", participant, ":", smsError);
+            smsResults.push({ phone: participant, success: false, error: smsError.message });
+          }
+        } else {
+          console.log("Twilio not configured, skipping SMS for:", participant);
+          smsResults.push({
+            phone: participant,
+            success: false,
+            error: "Twilio not configured",
+          });
+        }
       }
     }
 

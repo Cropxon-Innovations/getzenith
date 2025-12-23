@@ -64,7 +64,7 @@ interface NavGroup {
   defaultOpen?: boolean;
 }
 
-// Navigation structure based on RBAC
+// Navigation structure based on RBAC - removed Content section (moved to Studios)
 const adminNavigation: NavGroup[] = [
   {
     title: 'Overview',
@@ -86,16 +86,6 @@ const adminNavigation: NavGroup[] = [
       { icon: Globe, label: 'Website Builder', href: '/studio/website', roles: ['tenant_admin', 'editor'] },
       { icon: GraduationCap, label: 'LMS Studio', href: '/studio/lms', roles: ['tenant_admin', 'editor', 'mentor'] },
       { icon: Zap, label: 'Automation', href: '/studio/automation', badge: 'Pro', roles: ['tenant_admin'] },
-    ],
-  },
-  {
-    title: 'Content',
-    roles: ['tenant_admin', 'editor', 'mentor'],
-    defaultOpen: false,
-    items: [
-      { icon: Layers, label: 'All Content', href: '/admin/content', roles: ['tenant_admin', 'editor', 'mentor'] },
-      { icon: BookOpen, label: 'Courses', href: '/admin/content/courses', roles: ['tenant_admin', 'mentor'] },
-      { icon: Video, label: 'Media Library', href: '/admin/content/media', roles: ['tenant_admin', 'editor'] },
     ],
   },
   {
@@ -128,7 +118,6 @@ const adminNavigation: NavGroup[] = [
       { icon: MessageSquare, label: 'Messaging', href: '/admin/messaging', badge: 'Enterprise', roles: ['tenant_admin'] },
       { icon: Video, label: 'Meetings', href: '/admin/meetings', badge: 'Enterprise', roles: ['tenant_admin'] },
       { icon: CreditCard, label: 'Billing', href: '/admin/billing', roles: ['tenant_admin'] },
-      { icon: Building2, label: 'Settings', href: '/admin/settings', roles: ['tenant_admin'] },
     ],
   },
 ];
