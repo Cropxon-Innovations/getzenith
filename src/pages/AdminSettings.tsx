@@ -1,18 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft,
   Building2,
   Globe,
   Palette,
   Users,
   Shield,
-  Bell,
   CreditCard,
-  Settings,
-  Mail,
-  Phone,
   Crown,
   ExternalLink,
   Copy,
@@ -23,16 +18,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ZenithLogo } from '@/components/ZenithLogo';
 import { VerificationStatusCard, VerificationStatus } from '@/components/admin/VerificationBadge';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminSettings() {
-  const { user, profile, tenant, signOut, isLoading, updateTenant } = useAuth();
+  const { user, profile, tenant, isLoading, updateTenant } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -110,34 +106,17 @@ export default function AdminSettings() {
   }
 
   const previewDomain = `${tenant?.slug || 'your-tenant'}.getzenith.io`;
+  const defaultTab = searchParams.get('tab') || 'general';
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="h-full max-w-5xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/admin">
-                <ArrowLeft size={20} />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="font-semibold text-foreground">Settings</h1>
-              <p className="text-xs text-muted-foreground">{tenant?.name}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => signOut()}>
-              Sign Out
-            </Button>
-          </div>
+    <AdminLayout>
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground">Manage your workspace settings and preferences</p>
         </div>
-      </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto gap-2 bg-transparent p-0">
             <TabsTrigger value="general" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Building2 size={16} className="mr-2" />
@@ -147,7 +126,7 @@ export default function AdminSettings() {
               <Palette size={16} className="mr-2" />
               Branding
             </TabsTrigger>
-            <TabsTrigger value="domain" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="domains" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Globe size={16} className="mr-2" />
               Domain
             </TabsTrigger>
@@ -276,7 +255,7 @@ export default function AdminSettings() {
           </TabsContent>
 
           {/* Domain Settings */}
-          <TabsContent value="domain" className="space-y-6">
+          <TabsContent value="domains" className="space-y-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <Card>
                 <CardHeader>
@@ -484,7 +463,7 @@ export default function AdminSettings() {
             </motion.div>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+export type AppRole = 'tenant_admin' | 'editor' | 'mentor' | 'viewer';
+
 interface Profile {
   id: string;
   full_name: string | null;
@@ -29,6 +31,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   tenant: Tenant | null;
+  userRole: AppRole | null;
   isLoading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -44,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [userRole, setUserRole] = useState<AppRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -57,6 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile(data);
       
       if (data.current_tenant_id) {
+        // Fetch tenant
         const { data: tenantData } = await supabase
           .from('tenants')
           .select('*')
@@ -65,6 +70,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (tenantData) {
           setTenant(tenantData);
+        }
+
+        // Fetch user role for current tenant
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('tenant_id', data.current_tenant_id)
+          .maybeSingle();
+        
+        if (roleData) {
+          setUserRole(roleData.role as AppRole);
         }
       }
     }
@@ -83,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setProfile(null);
           setTenant(null);
+          setUserRole(null);
         }
       }
     );
@@ -158,6 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setProfile(null);
     setTenant(null);
+    setUserRole(null);
   };
 
   const refreshProfile = async () => {
@@ -187,6 +206,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       profile,
       tenant,
+      userRole,
       isLoading,
       signUp,
       signIn,

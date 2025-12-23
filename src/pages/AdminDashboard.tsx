@@ -12,23 +12,20 @@ import {
   ArrowRight,
   Users,
   BarChart3,
-  Settings,
   TrendingUp,
   Eye,
   Clock,
   Activity,
   Plus,
   Calendar,
-  Bell,
-  Mail,
-  Phone,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ZenithLogo } from '@/components/ZenithLogo';
-import { VerificationBadge, VerificationStatusCard, VerificationStatus } from '@/components/admin/VerificationBadge';
+import { VerificationStatusCard, VerificationStatus } from '@/components/admin/VerificationBadge';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useToast } from '@/hooks/use-toast';
 
 const studios = [
@@ -53,7 +50,7 @@ const recentActivity = [
 ];
 
 export default function AdminDashboard() {
-  const { user, profile, tenant, signOut, isLoading } = useAuth();
+  const { user, profile, tenant, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [animatedStats, setAnimatedStats] = useState({ content: 0, users: 0, views: 0, growth: 0 });
@@ -130,42 +127,9 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="h-full max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <ZenithLogo size={32} />
-            <div>
-              <h1 className="font-semibold text-foreground">{tenant?.name || 'Dashboard'}</h1>
-              <p className="text-xs text-muted-foreground">{tenant?.subdomain}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {/* Verification Badges */}
-            <div className="hidden sm:flex items-center gap-2">
-              <VerificationBadge type="email" status={emailStatus} size="sm" />
-              <VerificationBadge type="phone" status={phoneStatus} size="sm" />
-            </div>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/admin/settings">
-                <Settings size={18} className="mr-2" />
-                Settings
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => signOut()}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+    <AdminLayout>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -420,7 +384,7 @@ export default function AdminDashboard() {
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
