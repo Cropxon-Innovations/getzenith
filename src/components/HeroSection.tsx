@@ -9,6 +9,8 @@ import { DemoModal } from './demo/DemoModal';
 
 export const HeroSection = () => {
   const [demoOpen, setDemoOpen] = useState(false);
+
+  return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
       {/* Background gradient - theme aware */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/30" />
