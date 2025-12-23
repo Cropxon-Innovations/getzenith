@@ -110,6 +110,8 @@ const adminNavigation: NavGroup[] = [
     items: [
       { icon: Plug, label: 'Integrations', href: '/admin/integrations', roles: ['tenant_admin'] },
       { icon: Bell, label: 'Notifications', href: '/admin/notifications', roles: ['tenant_admin'] },
+      { icon: MessageSquare, label: 'Messaging', href: '/admin/messaging', badge: 'Enterprise', roles: ['tenant_admin'] },
+      { icon: Video, label: 'Meetings', href: '/admin/meetings', badge: 'Enterprise', roles: ['tenant_admin'] },
       { icon: CreditCard, label: 'Billing', href: '/admin/billing', roles: ['tenant_admin'] },
       { icon: Building2, label: 'Settings', href: '/admin/settings', roles: ['tenant_admin'] },
     ],

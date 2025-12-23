@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
@@ -20,9 +20,18 @@ import {
   Calendar,
   MessageSquare,
   Bell,
+  ArrowLeft,
+  Home,
 } from 'lucide-react';
 import { ZenithLogo } from '../ZenithLogo';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface NavItem {
   icon: React.ElementType;
@@ -185,6 +194,43 @@ export const StudioSidebar = () => {
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
+      </div>
+
+      {/* Back to Admin Dashboard */}
+      <div className="p-2 border-b border-border">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                to="/admin"
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+                  'bg-primary/5 hover:bg-primary/10 text-primary border border-primary/20',
+                  collapsed && 'justify-center px-0'
+                )}
+              >
+                <ArrowLeft size={20} />
+                <AnimatePresence mode="wait">
+                  {!collapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="text-sm font-medium whitespace-nowrap"
+                    >
+                      Back to Dashboard
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Link>
+            </TooltipTrigger>
+            {collapsed && (
+              <TooltipContent side="right">
+                <p>Back to Dashboard</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Navigation */}
