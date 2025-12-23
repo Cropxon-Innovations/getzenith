@@ -12,7 +12,7 @@ const navItems = [
   { label: 'Solutions', href: '#solutions', icon: Globe, isRoute: false },
   { label: 'Enterprise', href: '#enterprise', icon: Building2, isRoute: false },
   { label: 'Docs', href: '/docs', icon: BookOpen, isRoute: true },
-  { label: 'Pricing', href: '#pricing', icon: CreditCard, isRoute: false },
+  { label: 'Pricing', href: '/pricing', icon: CreditCard, isRoute: true },
 ];
 
 export const Header = () => {
