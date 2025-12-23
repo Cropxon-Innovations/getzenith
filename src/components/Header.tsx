@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, FileText, Globe, GraduationCap, Zap, Layout, Building2, BookOpen, CreditCard } from 'lucide-react';
 import { ZenithLogo } from './ZenithLogo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const navItems = [
-  { label: 'Product', href: '#product' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Enterprise', href: '#enterprise' },
-  { label: 'Docs', href: '#docs' },
-  { label: 'Pricing', href: '#pricing' },
+  { label: 'Product', href: '#product', icon: Layout },
+  { label: 'How It Works', href: '#how-it-works', icon: Zap },
+  { label: 'Solutions', href: '#solutions', icon: Globe },
+  { label: 'Enterprise', href: '#enterprise', icon: Building2 },
+  { label: 'Docs', href: '#docs', icon: BookOpen },
+  { label: 'Pricing', href: '#pricing', icon: CreditCard },
 ];
 
 export const Header = () => {
@@ -34,49 +35,60 @@ export const Header = () => {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-background/80 backdrop-blur-xl border-b border-border'
-            : 'bg-transparent'
+            ? 'bg-card/95 backdrop-blur-xl border-b border-border shadow-sm'
+            : 'bg-background/50 backdrop-blur-sm'
         }`}
       >
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <a href="/" className="flex items-center gap-3">
-              <ZenithLogo size={40} animated={false} />
-              <span className="text-xl font-semibold tracking-tight">Zenith</span>
-            </a>
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
+              <ZenithLogo size={36} animated={false} />
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+                Zenith
+              </span>
+            </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
                 >
+                  <item.icon size={16} className="opacity-70" />
                   {item.label}
                 </a>
               ))}
             </nav>
 
             {/* Right Actions */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-2">
               <ThemeSwitcher />
-              <Button variant="ghost" size="sm">
-                Login
-              </Button>
-              <Button size="sm" className="bg-gradient-primary text-primary-foreground">
-                Start Free Trial
-              </Button>
+              <Link to="/auth">
+                <Button variant="ghost" size="sm" className="font-medium text-foreground">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button size="sm" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20">
+                  Start Free Trial
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2"
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <ThemeSwitcher />
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary text-foreground transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -89,29 +101,39 @@ export const Header = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-background pt-20 lg:hidden"
+            className="fixed inset-0 z-40 bg-background pt-20 lg:hidden overflow-auto"
           >
-            <nav className="container mx-auto px-6 py-8">
-              <div className="flex flex-col gap-4">
-                {navItems.map((item) => (
-                  <a
+            <nav className="container mx-auto px-4 py-6">
+              <div className="flex flex-col gap-1">
+                {navItems.map((item, index) => (
+                  <motion.a
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-lg py-3 border-b border-border text-foreground"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-secondary/80 transition-colors"
                   >
-                    {item.label}
-                  </a>
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <item.icon size={20} className="text-primary" />
+                    </div>
+                    <span className="text-base font-medium">{item.label}</span>
+                  </motion.a>
                 ))}
-                <div className="pt-4 flex flex-col gap-3">
-                  <ThemeSwitcher />
-                  <Button variant="outline" className="w-full">
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-border flex flex-col gap-3">
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full h-12 font-medium text-foreground border-border">
                     Login
                   </Button>
-                  <Button className="w-full bg-gradient-primary text-primary-foreground">
+                </Link>
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full h-12 font-semibold bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                     Start Free Trial
                   </Button>
-                </div>
+                </Link>
               </div>
             </nav>
           </motion.div>
