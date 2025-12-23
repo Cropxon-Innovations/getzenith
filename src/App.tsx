@@ -36,6 +36,8 @@ import TeamManagement from "./pages/admin/TeamManagement";
 import ContentManagement from "./pages/admin/ContentManagement";
 import Integrations from "./pages/admin/Integrations";
 import BusinessManagement from "./pages/admin/BusinessManagement";
+import Billing from "./pages/admin/Billing";
+import Notifications from "./pages/admin/Notifications";
 
 // Studio
 import Studio from "./pages/Studio";
@@ -80,6 +82,8 @@ const AnimatedRoutes = () => {
         <Route path="/admin/content/media" element={<PageTransition><ContentManagement /></PageTransition>} />
         <Route path="/admin/integrations" element={<PageTransition><Integrations /></PageTransition>} />
         <Route path="/admin/business" element={<PageTransition><BusinessManagement /></PageTransition>} />
+        <Route path="/admin/billing" element={<PageTransition><Billing /></PageTransition>} />
+        <Route path="/admin/notifications" element={<PageTransition><Notifications /></PageTransition>} />
         <Route path="/admin/growth" element={<PageTransition><Analytics /></PageTransition>} />
         
         {/* Studio Routes */}
