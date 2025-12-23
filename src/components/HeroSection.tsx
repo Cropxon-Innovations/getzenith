@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { OrbitalSystem } from './OrbitalSystem';
 import { ZenithLogo } from './ZenithLogo';
 import { Link } from 'react-router-dom';
+import { LiveDashboardPreview } from './hero/LiveDashboardPreview';
 
 export const HeroSection = () => {
   return (
@@ -182,14 +182,14 @@ export const HeroSection = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right: Orbital System Visualization */}
+          {/* Right: Live Dashboard Preview */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
             className="relative flex items-center justify-center mt-8 lg:mt-0"
           >
-            <OrbitalSystem />
+            <LiveDashboardPreview />
           </motion.div>
         </div>
       </div>
