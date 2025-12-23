@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Sparkles, Check } from 'lucide-react';
+import { ArrowRight, Play, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OrbitalSystem } from './OrbitalSystem';
+import { ZenithLogo } from './ZenithLogo';
 import { Link } from 'react-router-dom';
 
 export const HeroSection = () => {
@@ -59,19 +60,14 @@ export const HeroSection = () => {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="text-center lg:text-left"
           >
-            {/* Badge */}
+            {/* Badge with Z Logo */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-sm font-medium text-foreground mb-6"
+              className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-sm font-medium text-foreground mb-6"
             >
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Sparkles size={16} className="text-primary" />
-              </motion.div>
+              <ZenithLogo size={20} animated={false} />
               <span>Introducing Zenith Studio</span>
               <motion.span 
                 animate={{ opacity: [1, 0.5, 1] }}
