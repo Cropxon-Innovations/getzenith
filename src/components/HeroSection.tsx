@@ -132,7 +132,7 @@ export const HeroSection = () => {
               transition={{ delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
             >
-              <Link to="/auth">
+              <Link to="/get-started">
                 <Button 
                   size="lg" 
                   className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 text-base font-semibold px-6 sm:px-8 w-full sm:w-auto shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
