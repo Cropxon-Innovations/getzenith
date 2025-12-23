@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const navItems = [
-  { label: 'Product', href: '#product', icon: Layout },
-  { label: 'How It Works', href: '#how-it-works', icon: Zap },
-  { label: 'Solutions', href: '#solutions', icon: Globe },
-  { label: 'Enterprise', href: '#enterprise', icon: Building2 },
-  { label: 'Docs', href: '#docs', icon: BookOpen },
-  { label: 'Pricing', href: '#pricing', icon: CreditCard },
+  { label: 'Product', href: '#product', icon: Layout, isRoute: false },
+  { label: 'How It Works', href: '#how-it-works', icon: Zap, isRoute: false },
+  { label: 'Solutions', href: '#solutions', icon: Globe, isRoute: false },
+  { label: 'Enterprise', href: '#enterprise', icon: Building2, isRoute: false },
+  { label: 'Docs', href: '/docs', icon: BookOpen, isRoute: true },
+  { label: 'Pricing', href: '#pricing', icon: CreditCard, isRoute: false },
 ];
 
 export const Header = () => {
@@ -50,22 +50,41 @@ export const Header = () => {
 
             <nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => (
-                <motion.a
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
-                  whileHover={{ scale: 1.02, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                >
-                  <motion.div
-                    whileHover={{ rotate: [0, -10, 10, 0] }}
-                    transition={{ duration: 0.4 }}
+                item.isRoute ? (
+                  <Link key={item.label} to={item.href}>
+                    <motion.div
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    >
+                      <motion.div
+                        whileHover={{ rotate: [0, -10, 10, 0] }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <item.icon size={16} className="opacity-70" />
+                      </motion.div>
+                      {item.label}
+                    </motion.div>
+                  </Link>
+                ) : (
+                  <motion.a
+                    key={item.label}
+                    href={item.href}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                   >
-                    <item.icon size={16} className="opacity-70" />
-                  </motion.div>
-                  {item.label}
-                </motion.a>
+                    <motion.div
+                      whileHover={{ rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <item.icon size={16} className="opacity-70" />
+                    </motion.div>
+                    {item.label}
+                  </motion.a>
+                )
               ))}
             </nav>
 
@@ -121,20 +140,40 @@ export const Header = () => {
             <nav className="container mx-auto px-4 py-6">
               <div className="flex flex-col gap-1">
                 {navItems.map((item, index) => (
-                  <motion.a
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-secondary/80 transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon size={20} className="text-primary" />
-                    </div>
-                    <span className="text-base font-medium">{item.label}</span>
-                  </motion.a>
+                  item.isRoute ? (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-secondary/80 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <item.icon size={20} className="text-primary" />
+                        </div>
+                        <span className="text-base font-medium">{item.label}</span>
+                      </motion.div>
+                    </Link>
+                  ) : (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-secondary/80 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <item.icon size={20} className="text-primary" />
+                      </div>
+                      <span className="text-base font-medium">{item.label}</span>
+                    </motion.a>
+                  )
                 ))}
               </div>
               
