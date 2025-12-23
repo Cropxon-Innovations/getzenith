@@ -22,6 +22,7 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSettings from "./pages/AdminSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const AnimatedRoutes = () => {
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/get-started" element={<PageTransition><Onboarding /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
+        <Route path="/admin/settings" element={<PageTransition><AdminSettings /></PageTransition>} />
         <Route path="/admin/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
         <Route path="/auth/confirm" element={<PageTransition><EmailConfirmation /></PageTransition>} />
         <Route path="/studio/:studioType" element={<PageTransition><Studio /></PageTransition>} />
