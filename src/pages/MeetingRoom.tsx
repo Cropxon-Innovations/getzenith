@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mic,
   MicOff,
@@ -9,16 +9,19 @@ import {
   Phone,
   Users,
   MessageSquare,
-  Share2,
-  Settings,
   Monitor,
   Hand,
-  MoreVertical,
   Copy,
   Check,
+  Circle,
+  StopCircle,
+  UserPlus,
+  UserMinus,
+  Clock,
+  DoorOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -50,6 +53,14 @@ interface Participant {
   isHandRaised: boolean;
 }
 
+interface WaitingParticipant {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string;
+  joinedAt: string;
+}
+
 interface ChatMessage {
   id: string;
   sender: string;
@@ -64,20 +75,28 @@ export default function MeetingRoom() {
   const { toast } = useToast();
   
   const [isJoined, setIsJoined] = useState(false);
+  const [isInWaitingRoom, setIsInWaitingRoom] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isHandRaised, setIsHandRaised] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [waitingParticipants, setWaitingParticipants] = useState<WaitingParticipant[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
   const [meetingInfo, setMeetingInfo] = useState<any>(null);
+  const [isHost, setIsHost] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
   
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const channelRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ICE servers configuration
   const iceServers = {
@@ -107,10 +126,11 @@ export default function MeetingRoom() {
       }
 
       setMeetingInfo(data);
+      setIsHost(data.host_id === user?.id);
     };
 
     fetchMeeting();
-  }, [meetingId, toast]);
+  }, [meetingId, toast, user?.id]);
 
   // Initialize local media
   const initializeMedia = useCallback(async () => {
@@ -138,12 +158,94 @@ export default function MeetingRoom() {
     }
   }, [toast]);
 
-  // Join meeting via Supabase Realtime
-  const joinMeeting = async () => {
+  // Handle waiting room
+  const requestToJoin = async () => {
+    if (!meetingInfo?.waiting_room_enabled) {
+      await joinMeeting();
+      return;
+    }
+
     const stream = await initializeMedia();
     if (!stream) return;
 
-    // Setup Supabase Realtime channel for signaling
+    setIsInWaitingRoom(true);
+
+    // Add to waiting room via realtime
+    const channel = supabase.channel(`waiting:${meetingId}`);
+    
+    channel
+      .on('broadcast', { event: 'admitted' }, ({ payload }) => {
+        if (payload.participantId === user?.id) {
+          setIsInWaitingRoom(false);
+          joinMeetingAfterAdmission();
+        }
+      })
+      .on('broadcast', { event: 'denied' }, ({ payload }) => {
+        if (payload.participantId === user?.id) {
+          toast({
+            title: 'Access Denied',
+            description: 'The host has denied your request to join.',
+            variant: 'destructive',
+          });
+          setIsInWaitingRoom(false);
+          navigate('/admin/meetings');
+        }
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.send({
+            type: 'broadcast',
+            event: 'join-request',
+            payload: {
+              participantId: user?.id,
+              name: profile?.full_name || 'Anonymous',
+              email: user?.email || '',
+              avatar_url: profile?.avatar_url,
+              joinedAt: new Date().toISOString(),
+            },
+          });
+        }
+      });
+  };
+
+  // Host: admit participant
+  const admitParticipant = async (participant: WaitingParticipant) => {
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'admitted',
+      payload: { participantId: participant.id },
+    });
+    
+    setWaitingParticipants(prev => prev.filter(p => p.id !== participant.id));
+    
+    toast({
+      title: 'Participant Admitted',
+      description: `${participant.name} has been admitted to the meeting.`,
+    });
+  };
+
+  // Host: deny participant
+  const denyParticipant = async (participant: WaitingParticipant) => {
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'denied',
+      payload: { participantId: participant.id },
+    });
+    
+    setWaitingParticipants(prev => prev.filter(p => p.id !== participant.id));
+  };
+
+  // Join meeting after admission
+  const joinMeetingAfterAdmission = async () => {
+    const stream = localStreamRef.current;
+    if (!stream) return;
+
+    await setupMeetingChannel(stream);
+    setIsJoined(true);
+  };
+
+  // Setup meeting channel
+  const setupMeetingChannel = async (stream: MediaStream) => {
     const channel = supabase.channel(`meeting:${meetingId}`, {
       config: {
         presence: {
@@ -176,7 +278,6 @@ export default function MeetingRoom() {
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         console.log('User joined:', key, newPresences);
-        // Create peer connection for new participant
         newPresences.forEach((presence: any) => {
           if (presence.user_id !== user?.id) {
             createPeerConnection(presence.user_id, stream);
@@ -185,7 +286,6 @@ export default function MeetingRoom() {
       })
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
         console.log('User left:', key, leftPresences);
-        // Clean up peer connection
         leftPresences.forEach((presence: any) => {
           const pc = peerConnectionsRef.current.get(presence.user_id);
           if (pc) {
@@ -193,6 +293,20 @@ export default function MeetingRoom() {
             peerConnectionsRef.current.delete(presence.user_id);
           }
         });
+      })
+      .on('broadcast', { event: 'join-request' }, ({ payload }) => {
+        if (isHost) {
+          setWaitingParticipants(prev => {
+            if (prev.some(p => p.id === payload.participantId)) return prev;
+            return [...prev, {
+              id: payload.participantId,
+              name: payload.name,
+              email: payload.email,
+              avatar_url: payload.avatar_url,
+              joinedAt: payload.joinedAt,
+            }];
+          });
+        }
       })
       .on('broadcast', { event: 'offer' }, async ({ payload }) => {
         if (payload.target === user?.id) {
@@ -233,6 +347,14 @@ export default function MeetingRoom() {
       });
 
     channelRef.current = channel;
+  };
+
+  // Join meeting (for non-waiting room or host)
+  const joinMeeting = async () => {
+    const stream = await initializeMedia();
+    if (!stream) return;
+
+    await setupMeetingChannel(stream);
     setIsJoined(true);
   };
 
@@ -240,12 +362,10 @@ export default function MeetingRoom() {
   const createPeerConnection = async (peerId: string, stream: MediaStream) => {
     const pc = new RTCPeerConnection(iceServers);
     
-    // Add local tracks
     stream.getTracks().forEach((track) => {
       pc.addTrack(track, stream);
     });
 
-    // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         channelRef.current?.send({
@@ -260,15 +380,12 @@ export default function MeetingRoom() {
       }
     };
 
-    // Handle remote stream
     pc.ontrack = (event) => {
       console.log('Remote track received:', event.streams[0]);
-      // Add remote video element dynamically
     };
 
     peerConnectionsRef.current.set(peerId, pc);
 
-    // Create and send offer
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
@@ -352,7 +469,6 @@ export default function MeetingRoom() {
       });
       setIsMuted(!isMuted);
       
-      // Update presence
       channelRef.current?.track({
         user_id: user?.id,
         name: profile?.full_name || 'Anonymous',
@@ -401,7 +517,6 @@ export default function MeetingRoom() {
           video: true,
         });
         
-        // Replace video track in peer connections
         const videoTrack = screenStream.getVideoTracks()[0];
         peerConnectionsRef.current.forEach((pc) => {
           const sender = pc.getSenders().find((s) => s.track?.kind === 'video');
@@ -412,7 +527,6 @@ export default function MeetingRoom() {
 
         videoTrack.onended = () => {
           setIsScreenSharing(false);
-          // Restore camera
           if (localStreamRef.current) {
             const cameraTrack = localStreamRef.current.getVideoTracks()[0];
             peerConnectionsRef.current.forEach((pc) => {
@@ -429,7 +543,6 @@ export default function MeetingRoom() {
         console.error('Screen share error:', error);
       }
     } else {
-      // Stop screen sharing
       if (localStreamRef.current) {
         const cameraTrack = localStreamRef.current.getVideoTracks()[0];
         peerConnectionsRef.current.forEach((pc) => {
@@ -441,6 +554,139 @@ export default function MeetingRoom() {
       }
       setIsScreenSharing(false);
     }
+  };
+
+  // Recording functions
+  const startRecording = async () => {
+    if (!localStreamRef.current) return;
+
+    try {
+      // Get screen + audio for recording
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+
+      // Combine with microphone audio
+      const audioContext = new AudioContext();
+      const dest = audioContext.createMediaStreamDestination();
+      
+      if (localStreamRef.current.getAudioTracks().length > 0) {
+        const micSource = audioContext.createMediaStreamSource(localStreamRef.current);
+        micSource.connect(dest);
+      }
+      
+      if (screenStream.getAudioTracks().length > 0) {
+        const screenAudioSource = audioContext.createMediaStreamSource(screenStream);
+        screenAudioSource.connect(dest);
+      }
+
+      const combinedStream = new MediaStream([
+        ...screenStream.getVideoTracks(),
+        ...dest.stream.getAudioTracks(),
+      ]);
+
+      const mediaRecorder = new MediaRecorder(combinedStream, {
+        mimeType: 'video/webm;codecs=vp9',
+      });
+
+      recordedChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+        await saveRecording(blob);
+        
+        screenStream.getTracks().forEach(track => track.stop());
+        clearInterval(recordingIntervalRef.current!);
+        setRecordingDuration(0);
+      };
+
+      mediaRecorder.start(1000);
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+
+      // Update recording duration
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+
+      // Update meeting status
+      await supabase
+        .from('meetings')
+        .update({ is_recording: true })
+        .eq('id', meetingInfo?.id);
+
+      toast({
+        title: 'Recording Started',
+        description: 'The meeting is now being recorded.',
+      });
+    } catch (error) {
+      console.error('Recording error:', error);
+      toast({
+        title: 'Recording Error',
+        description: 'Could not start recording.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const saveRecording = async (blob: Blob) => {
+    try {
+      const fileName = `${user?.id}/${meetingId}/${Date.now()}.webm`;
+      
+      const { data, error } = await supabase.storage
+        .from('meeting-recordings')
+        .upload(fileName, blob, {
+          contentType: 'video/webm',
+        });
+
+      if (error) throw error;
+
+      // Update meeting with recording URL
+      const { data: publicUrl } = supabase.storage
+        .from('meeting-recordings')
+        .getPublicUrl(fileName);
+
+      await supabase
+        .from('meetings')
+        .update({ 
+          recording_url: publicUrl.publicUrl,
+          is_recording: false 
+        })
+        .eq('id', meetingInfo?.id);
+
+      toast({
+        title: 'Recording Saved',
+        description: 'The meeting recording has been saved to cloud storage.',
+      });
+    } catch (error) {
+      console.error('Save recording error:', error);
+      toast({
+        title: 'Save Error',
+        description: 'Could not save the recording.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const sendChatMessage = () => {
@@ -467,14 +713,13 @@ export default function MeetingRoom() {
   };
 
   const leaveMeeting = () => {
-    // Stop all tracks
-    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    if (isRecording) {
+      stopRecording();
+    }
     
-    // Close all peer connections
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
     peerConnectionsRef.current.forEach((pc) => pc.close());
     peerConnectionsRef.current.clear();
-    
-    // Unsubscribe from channel
     channelRef.current?.unsubscribe();
     
     navigate('/admin/meetings');
@@ -493,11 +738,69 @@ export default function MeetingRoom() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      if (isRecording) {
+        stopRecording();
+      }
       localStreamRef.current?.getTracks().forEach((track) => track.stop());
       peerConnectionsRef.current.forEach((pc) => pc.close());
       channelRef.current?.unsubscribe();
     };
-  }, []);
+  }, [isRecording]);
+
+  // Waiting room screen
+  if (isInWaitingRoom) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-lg w-full"
+        >
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <DoorOpen size={32} className="text-primary" />
+                </div>
+                <h1 className="text-2xl font-bold mb-2">Waiting Room</h1>
+                <p className="text-muted-foreground">
+                  Please wait for the host to admit you to the meeting.
+                </p>
+              </div>
+
+              <div className="aspect-video bg-muted rounded-lg mb-6 relative overflow-hidden">
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Clock size={16} className="animate-pulse" />
+                <span>Waiting for host approval...</span>
+              </div>
+
+              <div className="mt-6">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setIsInWaitingRoom(false);
+                    navigate('/admin/meetings');
+                  }}
+                >
+                  Leave Waiting Room
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   // Pre-join screen
   if (!isJoined) {
@@ -515,6 +818,12 @@ export default function MeetingRoom() {
                 <p className="text-muted-foreground">
                   {meetingInfo?.title || 'Loading...'}
                 </p>
+                {meetingInfo?.waiting_room_enabled && !isHost && (
+                  <Badge variant="secondary" className="mt-2">
+                    <DoorOpen size={12} className="mr-1" />
+                    Waiting room enabled
+                  </Badge>
+                )}
               </div>
 
               <div className="aspect-video bg-muted rounded-lg mb-6 relative overflow-hidden">
@@ -560,9 +869,9 @@ export default function MeetingRoom() {
                   </Button>
                   <Button
                     className="flex-1"
-                    onClick={joinMeeting}
+                    onClick={isHost ? joinMeeting : requestToJoin}
                   >
-                    Join Now
+                    {isHost ? 'Start Meeting' : 'Join Now'}
                   </Button>
                 </div>
               </div>
@@ -583,6 +892,12 @@ export default function MeetingRoom() {
             <Users size={12} />
             {participants.length}
           </Badge>
+          {isRecording && (
+            <Badge variant="destructive" className="gap-1 animate-pulse">
+              <Circle size={8} className="fill-current" />
+              REC {formatDuration(recordingDuration)}
+            </Badge>
+          )}
         </div>
         
         <div className="flex items-center gap-2">
@@ -656,6 +971,62 @@ export default function MeetingRoom() {
               ))}
           </div>
         </div>
+
+        {/* Waiting room sidebar (for host) */}
+        {isHost && waitingParticipants.length > 0 && (
+          <div className="w-72 border-l p-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <DoorOpen size={16} />
+                  Waiting Room ({waitingParticipants.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <AnimatePresence>
+                  {waitingParticipants.map((participant) => (
+                    <motion.div
+                      key={participant.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="flex items-center gap-3 p-2 rounded-lg bg-muted"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={participant.avatar_url} />
+                        <AvatarFallback className="text-xs">
+                          {participant.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{participant.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{participant.email}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-500/10"
+                          onClick={() => admitParticipant(participant)}
+                        >
+                          <UserPlus size={14} />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => denyParticipant(participant)}
+                        >
+                          <UserMinus size={14} />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Chat sidebar */}
         <Sheet>
@@ -763,6 +1134,23 @@ export default function MeetingRoom() {
           </TooltipTrigger>
           <TooltipContent>{isHandRaised ? 'Lower hand' : 'Raise hand'}</TooltipContent>
         </Tooltip>
+
+        {/* Recording control (host only) */}
+        {isHost && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isRecording ? 'destructive' : 'secondary'}
+                size="icon"
+                className="h-12 w-12 rounded-full"
+                onClick={isRecording ? stopRecording : startRecording}
+              >
+                {isRecording ? <StopCircle size={20} /> : <Circle size={20} />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isRecording ? 'Stop recording' : 'Start recording'}</TooltipContent>
+          </Tooltip>
+        )}
 
         <div className="w-px h-8 bg-border mx-2" />
 

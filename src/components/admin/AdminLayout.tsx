@@ -4,9 +4,9 @@ import { Menu, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ZenithLogo } from '@/components/ZenithLogo';
-import { VerificationBadge, VerificationStatus } from '@/components/admin/VerificationBadge';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminMobileDrawer } from '@/components/admin/AdminMobileDrawer';
+import { NotificationBell } from '@/components/admin/NotificationBell';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -15,9 +15,6 @@ interface AdminLayoutProps {
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, tenant, signOut } = useAuth();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-
-  const emailStatus: VerificationStatus = user?.email_confirmed_at ? 'verified' : 'pending';
-  const phoneStatus: VerificationStatus = user?.phone_confirmed_at ? 'verified' : 'unverified';
 
   return (
     <div className="min-h-screen bg-background flex w-full">
@@ -59,17 +56,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2">
-            {/* Verification Badges - Desktop */}
-            <div className="hidden sm:flex items-center gap-2">
-              <VerificationBadge type="email" status={emailStatus} size="sm" />
-              <VerificationBadge type="phone" status={phoneStatus} size="sm" />
-            </div>
-
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-            </Button>
+            <NotificationBell />
 
             {/* Sign Out */}
             <Button variant="ghost" size="icon" onClick={() => signOut()}>

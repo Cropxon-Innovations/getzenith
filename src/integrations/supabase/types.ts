@@ -235,12 +235,16 @@ export type Database = {
           duration_minutes: number | null
           host_id: string
           id: string
+          is_recording: boolean | null
           meeting_link: string | null
           participants: string[] | null
+          recording_url: string | null
           scheduled_at: string | null
           status: string | null
           tenant_id: string
           title: string
+          waiting_room_enabled: boolean | null
+          waiting_room_participants: Json | null
         }
         Insert: {
           created_at?: string
@@ -248,12 +252,16 @@ export type Database = {
           duration_minutes?: number | null
           host_id: string
           id?: string
+          is_recording?: boolean | null
           meeting_link?: string | null
           participants?: string[] | null
+          recording_url?: string | null
           scheduled_at?: string | null
           status?: string | null
           tenant_id: string
           title: string
+          waiting_room_enabled?: boolean | null
+          waiting_room_participants?: Json | null
         }
         Update: {
           created_at?: string
@@ -261,12 +269,16 @@ export type Database = {
           duration_minutes?: number | null
           host_id?: string
           id?: string
+          is_recording?: boolean | null
           meeting_link?: string | null
           participants?: string[] | null
+          recording_url?: string | null
           scheduled_at?: string | null
           status?: string | null
           tenant_id?: string
           title?: string
+          waiting_room_enabled?: boolean | null
+          waiting_room_participants?: Json | null
         }
         Relationships: [
           {
