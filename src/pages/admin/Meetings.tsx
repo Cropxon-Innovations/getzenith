@@ -13,6 +13,7 @@ import {
   Copy,
   ExternalLink,
   Crown,
+  FileText,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +32,8 @@ import { useMeetings, Meeting } from '@/hooks/useMeetings';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { useToast } from '@/hooks/use-toast';
 import { ScheduleMeetingModal } from '@/components/admin/meetings/ScheduleMeetingModal';
+import { CalendarSyncButton } from '@/components/admin/meetings/CalendarSyncButton';
+import { MeetingTranscript } from '@/components/admin/meetings/MeetingTranscript';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 const getDateLabel = (dateStr: string) => {
@@ -166,12 +169,17 @@ const MeetingCard = ({
                   </span>
                 </div>
 
-                {(isLive || isUpcoming) && (
-                  <Button size="sm" onClick={onJoin}>
-                    <Play size={14} className="mr-1" />
-                    {isLive ? 'Join Now' : 'Join'}
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* Calendar Sync */}
+                  <CalendarSyncButton meeting={meeting} />
+                  
+                  {(isLive || isUpcoming) && (
+                    <Button size="sm" onClick={onJoin}>
+                      <Play size={14} className="mr-1" />
+                      {isLive ? 'Join Now' : 'Join'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

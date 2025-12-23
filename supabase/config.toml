@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-meeting-invite]
 verify_jwt = true
+
+[functions.transcribe-meeting]
+verify_jwt = true

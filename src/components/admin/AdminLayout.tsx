@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,8 @@ import { ZenithLogo } from '@/components/ZenithLogo';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminMobileDrawer } from '@/components/admin/AdminMobileDrawer';
 import { NotificationBell } from '@/components/admin/NotificationBell';
+import { TrialBadge } from '@/components/admin/TrialBadge';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -14,7 +16,18 @@ interface AdminLayoutProps {
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, tenant, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: 'Signed out',
+      description: 'You have been logged out successfully.',
+    });
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-screen bg-background flex w-full">
@@ -55,12 +68,15 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           <div className="flex-1" />
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Trial Badge */}
+            <TrialBadge />
+
             {/* Notifications */}
             <NotificationBell />
 
             {/* Sign Out */}
-            <Button variant="ghost" size="icon" onClick={() => signOut()}>
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut size={18} />
             </Button>
           </div>
