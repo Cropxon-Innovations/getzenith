@@ -3,7 +3,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 interface SyntaxHighlighterProps {
   code: string;
-  language?: 'typescript' | 'javascript' | 'json' | 'bash';
+  language?: 'typescript' | 'javascript' | 'json' | 'bash' | 'python' | 'go' | 'graphql' | string;
   showLineNumbers?: boolean;
 }
 

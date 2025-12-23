@@ -1,89 +1,54 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Code, ChevronRight, Copy, Check, Terminal, Lock, 
-  Webhook, Database, FileText, Users, Settings,
-  ArrowRight, Play, Zap
+  Code, Lock, FileText, Users, Webhook, Terminal,
+  Copy, Check, AlertCircle
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+import { DocsLayout } from '@/components/docs/DocsLayout';
+import { SyntaxHighlighter } from '@/components/docs/SyntaxHighlighter';
 import { SEO } from '@/components/SEO';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const endpoints = [
-  {
-    category: 'Authentication',
-    icon: Lock,
-    color: '#EF4444',
-    items: [
-      { method: 'POST', path: '/auth/login', description: 'Authenticate user and get tokens' },
-      { method: 'POST', path: '/auth/refresh', description: 'Refresh access token' },
-      { method: 'POST', path: '/auth/logout', description: 'Revoke tokens' },
-    ]
-  },
-  {
-    category: 'Content',
-    icon: FileText,
-    color: '#3B82F6',
-    items: [
-      { method: 'GET', path: '/content', description: 'List all content items' },
-      { method: 'POST', path: '/content', description: 'Create new content' },
-      { method: 'GET', path: '/content/:id', description: 'Get content by ID' },
-      { method: 'PUT', path: '/content/:id', description: 'Update content' },
-      { method: 'DELETE', path: '/content/:id', description: 'Delete content' },
-    ]
-  },
-  {
-    category: 'Users',
-    icon: Users,
-    color: '#10B981',
-    items: [
-      { method: 'GET', path: '/users', description: 'List all users in tenant' },
-      { method: 'POST', path: '/users/invite', description: 'Invite new user' },
-      { method: 'PUT', path: '/users/:id/role', description: 'Update user role' },
-    ]
-  },
-  {
-    category: 'Webhooks',
-    icon: Webhook,
-    color: '#F59E0B',
-    items: [
-      { method: 'GET', path: '/webhooks', description: 'List all webhooks' },
-      { method: 'POST', path: '/webhooks', description: 'Create webhook' },
-      { method: 'DELETE', path: '/webhooks/:id', description: 'Delete webhook' },
-    ]
-  },
+  { category: 'Authentication', icon: Lock, color: '#EF4444', items: [
+    { method: 'POST', path: '/auth/login', description: 'Authenticate user and get tokens' },
+    { method: 'POST', path: '/auth/refresh', description: 'Refresh access token' },
+    { method: 'POST', path: '/auth/logout', description: 'Revoke tokens' },
+  ]},
+  { category: 'Content', icon: FileText, color: '#3B82F6', items: [
+    { method: 'GET', path: '/content', description: 'List all content items' },
+    { method: 'POST', path: '/content', description: 'Create new content' },
+    { method: 'GET', path: '/content/:id', description: 'Get content by ID' },
+    { method: 'PUT', path: '/content/:id', description: 'Update content' },
+    { method: 'DELETE', path: '/content/:id', description: 'Delete content' },
+  ]},
+  { category: 'Users', icon: Users, color: '#10B981', items: [
+    { method: 'GET', path: '/users', description: 'List all users in tenant' },
+    { method: 'POST', path: '/users/invite', description: 'Invite new user' },
+    { method: 'PUT', path: '/users/:id/role', description: 'Update user role' },
+  ]},
+  { category: 'Webhooks', icon: Webhook, color: '#F59E0B', items: [
+    { method: 'GET', path: '/webhooks', description: 'List all webhooks' },
+    { method: 'POST', path: '/webhooks', description: 'Create webhook' },
+    { method: 'DELETE', path: '/webhooks/:id', description: 'Delete webhook' },
+  ]},
 ];
 
 const methodColors: Record<string, string> = {
-  GET: '#10B981',
-  POST: '#3B82F6',
-  PUT: '#F59E0B',
-  DELETE: '#EF4444',
+  GET: '#10B981', POST: '#3B82F6', PUT: '#F59E0B', DELETE: '#EF4444',
 };
 
-const authExample = `curl -X POST https://api.zenith.studio/v1/auth/login \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "email": "user@example.com",
-    "password": "your-password"
-  }'`;
-
-const responseExample = `{
-  "access_token": "eyJhbGciOiJIUzI1NiIs...",
-  "refresh_token": "dGhpcyBpcyBhIHJlZnJl...",
-  "expires_in": 3600,
-  "token_type": "Bearer",
-  "user": {
-    "id": "usr_123abc",
-    "email": "user@example.com",
-    "tenant_id": "tnt_456def"
-  }
-}`;
+const tableOfContents = [
+  { id: 'authentication', title: 'Authentication', level: 2 },
+  { id: 'api-keys', title: 'API Keys', level: 3 },
+  { id: 'bearer-tokens', title: 'Bearer Tokens', level: 3 },
+  { id: 'content', title: 'Content API', level: 2 },
+  { id: 'users', title: 'Users API', level: 2 },
+  { id: 'webhooks', title: 'Webhooks API', level: 2 },
+  { id: 'rate-limits', title: 'Rate Limits', level: 2 },
+];
 
 const APIReference = () => {
-  const [activeCategory, setActiveCategory] = useState('Authentication');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const handleCopy = (code: string, id: string) => {
@@ -92,233 +57,265 @@ const APIReference = () => {
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  const CodeBlock = ({ code, language, id }: { code: string; language: string; id: string }) => (
+    <div className="rounded-xl border border-border overflow-hidden not-prose">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
+        <span className="text-xs text-muted-foreground capitalize">{language}</span>
+        <button
+          onClick={() => handleCopy(code, id)}
+          className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {copiedCode === id ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+          {copiedCode === id ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <SyntaxHighlighter code={code} language={language} />
+    </div>
+  );
+
+  const MethodBadge = ({ method }: { method: string }) => (
+    <span 
+      className="px-2.5 py-1 rounded text-xs font-bold uppercase"
+      style={{ backgroundColor: `${methodColors[method]}15`, color: methodColors[method] }}
+    >
+      {method}
+    </span>
+  );
+
   return (
     <>
       <SEO 
         title="API Reference | Zenith Studio Documentation"
         description="Complete REST API documentation for Zenith Studio. Authentication, endpoints, and examples."
       />
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        
-        <main className="pt-20">
-          <div className="container mx-auto px-4 sm:px-6 py-8">
-            {/* Breadcrumb */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 text-sm text-muted-foreground mb-8"
-            >
-              <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
-              <ChevronRight size={14} />
-              <span className="text-foreground">API Reference</span>
-            </motion.div>
+      <DocsLayout
+        title="API Reference"
+        description="The Zenith API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, and returns JSON-encoded responses."
+        icon={Code}
+        iconColor="#8B5CF6"
+        readTime="15 min"
+        difficulty="Intermediate"
+        tableOfContents={tableOfContents}
+        prevPage={{ title: 'Getting Started', href: '/docs/getting-started' }}
+        nextPage={{ title: 'SDK Guide', href: '/docs/sdk' }}
+      >
+        {/* Base URL */}
+        <div className="p-4 rounded-xl border border-border bg-card mb-8 not-prose">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Base URL</h3>
+          <code className="text-lg font-mono text-primary">https://api.zenith.studio/v1</code>
+        </div>
 
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-12"
-            >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-xs font-semibold text-primary uppercase tracking-wider mb-4">
-                <Code size={14} />
-                API Reference
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4">REST API Documentation</h1>
-              <p className="text-lg text-muted-foreground max-w-2xl">
-                The Zenith API is organized around REST. Our API has predictable resource-oriented URLs, 
-                accepts JSON-encoded request bodies, and returns JSON-encoded responses.
-              </p>
-            </motion.div>
+        {/* Authentication */}
+        <section id="authentication" className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 text-foreground flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+              <Lock size={18} className="text-red-500" />
+            </div>
+            Authentication
+          </h2>
 
-            {/* Base URL */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="p-4 rounded-xl border border-border bg-card mb-8"
-            >
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Base URL</h3>
-              <code className="text-lg font-mono text-primary">https://api.zenith.studio/v1</code>
-            </motion.div>
+          <p className="text-muted-foreground mb-6">
+            All API requests require authentication. Zenith supports two authentication methods.
+          </p>
 
-            <div className="grid lg:grid-cols-[300px_1fr] gap-12">
-              {/* Sidebar */}
-              <motion.aside
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="hidden lg:block"
-              >
-                <div className="sticky top-28 space-y-2">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                    Endpoints
-                  </h3>
-                  {endpoints.map((section) => (
-                    <button
-                      key={section.category}
-                      onClick={() => setActiveCategory(section.category)}
-                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        activeCategory === section.category
-                          ? 'bg-primary/10 text-primary font-medium'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                      }`}
-                    >
-                      <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${section.color}15` }}
-                      >
-                        <section.icon size={16} style={{ color: section.color }} />
-                      </div>
-                      {section.category}
-                    </button>
-                  ))}
-                </div>
-              </motion.aside>
+          <div id="api-keys" className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 text-foreground">API Keys</h3>
+            <p className="text-muted-foreground mb-4">
+              API keys are long-lived credentials for server-side integrations. Include them in the 
+              <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono mx-1">X-API-Key</code> header.
+            </p>
+            
+            <CodeBlock
+              id="api-key"
+              language="bash"
+              code={`curl -X GET "https://api.zenith.studio/v1/content" \\
+  -H "X-API-Key: zen_sk_live_abc123..." \\
+  -H "Content-Type: application/json"`}
+            />
 
-              {/* Main Content */}
-              <div className="space-y-12">
-                {/* Authentication Section */}
-                <section className="mb-12">
-                  <h2 className="text-2xl font-bold mb-4">Authentication</h2>
-                  <p className="text-muted-foreground mb-6">
-                    All API requests require authentication using Bearer tokens. Include the token 
-                    in the Authorization header of your requests.
+            <div className="mt-4 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 not-prose">
+              <div className="flex items-start gap-3">
+                <AlertCircle size={18} className="text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Security Warning</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Never expose API keys in client-side code. Use environment variables and server-side requests only.
                   </p>
-
-                  <div className="grid gap-6">
-                    {/* Request Example */}
-                    <div className="rounded-xl border border-border bg-card overflow-hidden">
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-                        <div className="flex items-center gap-2">
-                          <Terminal size={16} className="text-muted-foreground" />
-                          <span className="text-sm font-medium">Request Example</span>
-                        </div>
-                        <button
-                          onClick={() => handleCopy(authExample, 'auth')}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground"
-                        >
-                          {copiedCode === 'auth' ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-                          {copiedCode === 'auth' ? 'Copied!' : 'Copy'}
-                        </button>
-                      </div>
-                      <pre className="p-4 overflow-x-auto text-sm">
-                        <code className="text-muted-foreground">{authExample}</code>
-                      </pre>
-                    </div>
-
-                    {/* Response Example */}
-                    <div className="rounded-xl border border-border bg-card overflow-hidden">
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-500">200</span>
-                          <span className="text-sm font-medium">Response</span>
-                        </div>
-                        <button
-                          onClick={() => handleCopy(responseExample, 'response')}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground"
-                        >
-                          {copiedCode === 'response' ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-                          {copiedCode === 'response' ? 'Copied!' : 'Copy'}
-                        </button>
-                      </div>
-                      <pre className="p-4 overflow-x-auto text-sm">
-                        <code className="text-muted-foreground">{responseExample}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Endpoints List */}
-                {endpoints.map((section, sectionIndex) => (
-                  <motion.section
-                    key={section.category}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: sectionIndex * 0.1 }}
-                  >
-                    <div className="flex items-center gap-3 mb-6">
-                      <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: `${section.color}15` }}
-                      >
-                        <section.icon size={20} style={{ color: section.color }} />
-                      </div>
-                      <h2 className="text-2xl font-bold">{section.category}</h2>
-                    </div>
-
-                    <div className="space-y-3">
-                      {section.items.map((endpoint, i) => (
-                        <motion.div
-                          key={endpoint.path}
-                          initial={{ opacity: 0, x: -10 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: i * 0.05 }}
-                          className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors cursor-pointer group"
-                        >
-                          <span 
-                            className="px-2.5 py-1 rounded text-xs font-bold uppercase"
-                            style={{ 
-                              backgroundColor: `${methodColors[endpoint.method]}15`,
-                              color: methodColors[endpoint.method]
-                            }}
-                          >
-                            {endpoint.method}
-                          </span>
-                          <code className="text-sm font-mono text-foreground flex-1">{endpoint.path}</code>
-                          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                            {endpoint.description}
-                          </span>
-                          <ChevronRight size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.section>
-                ))}
-
-                {/* Rate Limits */}
-                <section className="p-6 rounded-2xl border border-border bg-secondary/30">
-                  <h3 className="text-xl font-bold mb-3">Rate Limits</h3>
-                  <p className="text-muted-foreground mb-4">
-                    API requests are rate limited based on your plan:
-                  </p>
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-xl bg-card border border-border">
-                      <h4 className="font-semibold text-foreground">Starter</h4>
-                      <p className="text-2xl font-bold text-primary">1,000</p>
-                      <p className="text-sm text-muted-foreground">requests/minute</p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-card border border-border">
-                      <h4 className="font-semibold text-foreground">Growth</h4>
-                      <p className="text-2xl font-bold text-primary">10,000</p>
-                      <p className="text-sm text-muted-foreground">requests/minute</p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-card border border-border">
-                      <h4 className="font-semibold text-foreground">Enterprise</h4>
-                      <p className="text-2xl font-bold text-primary">Unlimited</p>
-                      <p className="text-sm text-muted-foreground">Custom limits</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* CTA */}
-                <div className="p-6 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
-                  <h3 className="text-xl font-bold mb-2">Need help?</h3>
-                  <p className="text-muted-foreground mb-4">Explore our SDKs for easier integration.</p>
-                  <Link to="/docs/sdk">
-                    <Button className="gap-2">
-                      View SDK Documentation <ArrowRight size={16} />
-                    </Button>
-                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </main>
 
-        <Footer />
-      </div>
+          <div id="bearer-tokens" className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Bearer Tokens</h3>
+            <p className="text-muted-foreground mb-4">
+              For user authentication, use JWT bearer tokens obtained from the auth flow.
+            </p>
+
+            <CodeBlock
+              id="bearer"
+              language="typescript"
+              code={`import { Zenith } from '@zenith/sdk';
+
+const zenith = new Zenith({
+  token: 'eyJhbGciOiJIUzI1NiIs...',
+  tenantId: 'your-tenant-id'
+});
+
+const content = await zenith.cms.list();`}
+            />
+          </div>
+        </section>
+
+        {/* Content API */}
+        <section id="content" className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 text-foreground flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <FileText size={18} className="text-blue-500" />
+            </div>
+            Content API
+          </h2>
+
+          <div className="rounded-xl border border-border overflow-hidden mb-8 not-prose">
+            <div className="px-4 py-3 bg-muted/30 border-b border-border">
+              <span className="text-sm font-medium text-foreground">Endpoints</span>
+            </div>
+            <div className="divide-y divide-border">
+              {endpoints.find(e => e.category === 'Content')?.items.map((endpoint) => (
+                <div key={endpoint.path} className="flex items-center gap-4 px-4 py-3">
+                  <MethodBadge method={endpoint.method} />
+                  <code className="text-sm font-mono text-foreground flex-1">{endpoint.path}</code>
+                  <span className="text-sm text-muted-foreground">{endpoint.description}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Tabs defaultValue="list" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="list">List Content</TabsTrigger>
+              <TabsTrigger value="create">Create Content</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="list">
+              <CodeBlock
+                id="list-content"
+                language="typescript"
+                code={`const response = await zenith.cms.list({
+  limit: 10,
+  offset: 0,
+  type: 'blog',
+  status: 'published'
+});
+
+// Response
+{
+  data: [{ id: '...', title: '...', ... }],
+  total: 100,
+  limit: 10,
+  offset: 0
+}`}
+              />
+            </TabsContent>
+            
+            <TabsContent value="create">
+              <CodeBlock
+                id="create-content"
+                language="typescript"
+                code={`const newPost = await zenith.cms.create({
+  type: 'blog',
+  title: 'My New Blog Post',
+  slug: 'my-new-blog-post',
+  status: 'draft',
+  data: {
+    body: 'This is the content...',
+    author: 'John Doe',
+    tags: ['tutorial']
+  }
+});`}
+              />
+            </TabsContent>
+          </Tabs>
+        </section>
+
+        {/* Users API */}
+        <section id="users" className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 text-foreground flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+              <Users size={18} className="text-green-500" />
+            </div>
+            Users API
+          </h2>
+
+          <p className="text-muted-foreground mb-6">
+            Manage users, roles, and permissions within your tenant.
+          </p>
+
+          <CodeBlock
+            id="users"
+            language="typescript"
+            code={`// List users
+const users = await zenith.users.list({ role: 'editor' });
+
+// Invite a new user
+await zenith.users.invite({
+  email: 'newuser@example.com',
+  role: 'editor',
+  sendEmail: true
+});
+
+// Update user role
+await zenith.users.updateRole('user_id', 'admin');`}
+          />
+        </section>
+
+        {/* Webhooks API */}
+        <section id="webhooks" className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 text-foreground flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+              <Webhook size={18} className="text-yellow-500" />
+            </div>
+            Webhooks API
+          </h2>
+
+          <p className="text-muted-foreground mb-6">
+            Receive real-time notifications when events occur.
+          </p>
+
+          <CodeBlock
+            id="webhooks"
+            language="typescript"
+            code={`await zenith.webhooks.create({
+  url: 'https://your-server.com/webhooks/zenith',
+  events: [
+    'content.created',
+    'content.published',
+    'content.deleted'
+  ],
+  secret: 'your_webhook_secret'
+});`}
+          />
+        </section>
+
+        {/* Rate Limits */}
+        <section id="rate-limits" className="mb-8">
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Rate Limits</h2>
+          
+          <div className="grid sm:grid-cols-3 gap-4 not-prose">
+            {[
+              { plan: 'Starter', limit: '1,000', unit: 'requests/minute' },
+              { plan: 'Growth', limit: '10,000', unit: 'requests/minute' },
+              { plan: 'Enterprise', limit: 'Unlimited', unit: 'custom limits' },
+            ].map((tier) => (
+              <div key={tier.plan} className="p-4 rounded-xl bg-card border border-border">
+                <h4 className="font-semibold text-foreground">{tier.plan}</h4>
+                <p className="text-2xl font-bold text-primary">{tier.limit}</p>
+                <p className="text-sm text-muted-foreground">{tier.unit}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </DocsLayout>
     </>
   );
 };
