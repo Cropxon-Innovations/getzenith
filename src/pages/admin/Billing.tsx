@@ -20,6 +20,7 @@ import {
   BarChart3,
   Database,
   Cloud,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,13 +31,15 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useRazorpay, Plan, BillingCycle } from '@/hooks/useRazorpay';
 
 const plans = [
   {
-    id: 'starter',
+    id: 'starter' as Plan,
     name: 'Starter',
-    price: 29,
-    billing: 'month',
+    priceMonthly: 999,
+    priceYearly: 9999,
+    currency: '₹',
     description: 'Perfect for small businesses getting started',
     features: [
       '5 team members',
@@ -48,10 +51,11 @@ const plans = [
     popular: false,
   },
   {
-    id: 'professional',
+    id: 'professional' as Plan,
     name: 'Professional',
-    price: 79,
-    billing: 'month',
+    priceMonthly: 2499,
+    priceYearly: 24999,
+    currency: '₹',
     description: 'For growing teams that need more power',
     features: [
       '25 team members',
@@ -65,10 +69,11 @@ const plans = [
     popular: true,
   },
   {
-    id: 'enterprise',
+    id: 'enterprise' as Plan,
     name: 'Enterprise',
-    price: 199,
-    billing: 'month',
+    priceMonthly: 4999,
+    priceYearly: 49999,
+    currency: '₹',
     description: 'For large organizations with custom needs',
     features: [
       'Unlimited team members',
@@ -79,6 +84,8 @@ const plans = [
       'Full API access',
       'SSO & SAML',
       'Custom integrations',
+      'Messaging Hub',
+      'Video Meetings',
     ],
     popular: false,
   },
@@ -102,7 +109,9 @@ const usageMetrics = [
 export default function Billing() {
   const { tenant } = useAuth();
   const { toast } = useToast();
-  const [selectedPlan, setSelectedPlan] = useState('professional');
+  const { initiateCheckout, isLoading: isPaymentLoading } = useRazorpay();
+  const [selectedPlan, setSelectedPlan] = useState<Plan>('professional');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
   const trialDaysLeft = tenant?.trial_ends_at 
     ? Math.max(0, Math.ceil((new Date(tenant.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
@@ -111,11 +120,9 @@ export default function Billing() {
   const isTrialExpired = trialDaysLeft <= 0;
   const currentPlan = tenant?.plan || 'trial';
 
-  const handleUpgrade = (planId: string) => {
-    toast({
-      title: 'Upgrade Initiated',
-      description: `Upgrading to ${planId} plan. Redirecting to payment...`,
-    });
+  const handleUpgrade = async (planId: Plan) => {
+    setSelectedPlan(planId);
+    await initiateCheckout(planId, billingCycle);
   };
 
   const handleDownloadInvoice = (invoiceId: string) => {
@@ -337,8 +344,10 @@ export default function Billing() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="text-center">
-                        <span className="text-4xl font-bold text-foreground">${plan.price}</span>
-                        <span className="text-muted-foreground">/{plan.billing}</span>
+                        <span className="text-4xl font-bold text-foreground">
+                          {plan.currency}{billingCycle === 'monthly' ? plan.priceMonthly : plan.priceYearly}
+                        </span>
+                        <span className="text-muted-foreground">/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
                       </div>
                       
                       <Separator />

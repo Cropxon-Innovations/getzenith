@@ -38,6 +38,7 @@ import Integrations from "./pages/admin/Integrations";
 import BusinessManagement from "./pages/admin/BusinessManagement";
 import Billing from "./pages/admin/Billing";
 import Notifications from "./pages/admin/Notifications";
+import Messaging from "./pages/admin/Messaging";
 
 // Studio
 import Studio from "./pages/Studio";
@@ -84,6 +85,7 @@ const AnimatedRoutes = () => {
         <Route path="/admin/business" element={<PageTransition><BusinessManagement /></PageTransition>} />
         <Route path="/admin/billing" element={<PageTransition><Billing /></PageTransition>} />
         <Route path="/admin/notifications" element={<PageTransition><Notifications /></PageTransition>} />
+        <Route path="/admin/messaging" element={<PageTransition><Messaging /></PageTransition>} />
         <Route path="/admin/growth" element={<PageTransition><Analytics /></PageTransition>} />
         
         {/* Studio Routes */}
