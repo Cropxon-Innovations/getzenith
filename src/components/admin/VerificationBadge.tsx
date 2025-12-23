@@ -1,3 +1,4 @@
+import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -47,60 +48,63 @@ const sizeConfig = {
   lg: { badge: 'w-8 h-8', icon: 18, text: 'text-base' },
 };
 
-export function VerificationBadge({ 
-  type, 
-  status, 
-  value, 
-  className,
-  showLabel = false,
-  size = 'md'
-}: VerificationBadgeProps) {
-  const config = statusConfig[status];
-  const sizeStyles = sizeConfig[size];
-  const TypeIcon = type === 'email' ? Mail : Phone;
-  const StatusIcon = config.icon;
+export const VerificationBadge = forwardRef<HTMLDivElement, VerificationBadgeProps>(
+  function VerificationBadge({ 
+    type, 
+    status, 
+    value, 
+    className,
+    showLabel = false,
+    size = 'md'
+  }, ref) {
+    const config = statusConfig[status];
+    const sizeStyles = sizeConfig[size];
+    const TypeIcon = type === 'email' ? Mail : Phone;
+    const StatusIcon = config.icon;
 
-  const tooltipText = `${type === 'email' ? 'Email' : 'Phone'}: ${config.label}${value ? ` (${value})` : ''}`;
+    const tooltipText = `${type === 'email' ? 'Email' : 'Phone'}: ${config.label}${value ? ` (${value})` : ''}`;
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <motion.div 
-          className={cn(
-            'inline-flex items-center gap-2 px-2 py-1 rounded-full border transition-colors cursor-default',
-            config.bgColor,
-            config.borderColor,
-            className
-          )}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="relative">
-            <TypeIcon size={sizeStyles.icon} className={config.color} />
-            {config.pulse && (
-              <motion.div
-                className={cn('absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-yellow-500')}
-                animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              />
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.div 
+            ref={ref}
+            className={cn(
+              'inline-flex items-center gap-2 px-2 py-1 rounded-full border transition-colors cursor-default',
+              config.bgColor,
+              config.borderColor,
+              className
             )}
-          </div>
-          
-          {showLabel && (
-            <span className={cn('font-medium', config.color, sizeStyles.text)}>
-              {config.label}
-            </span>
-          )}
-          
-          <StatusIcon size={sizeStyles.icon - 2} className={config.color} />
-        </motion.div>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>{tooltipText}</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <div className="relative">
+              <TypeIcon size={sizeStyles.icon} className={config.color} />
+              {config.pulse && (
+                <motion.div
+                  className={cn('absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-yellow-500')}
+                  animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              )}
+            </div>
+            
+            {showLabel && (
+              <span className={cn('font-medium', config.color, sizeStyles.text)}>
+                {config.label}
+              </span>
+            )}
+            
+            <StatusIcon size={sizeStyles.icon - 2} className={config.color} />
+          </motion.div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+);
 
 interface VerificationStatusCardProps {
   emailStatus: VerificationStatus;
