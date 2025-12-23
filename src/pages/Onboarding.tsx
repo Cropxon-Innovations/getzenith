@@ -147,23 +147,52 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full bg-primary/5 blur-3xl"
+          animate={{ 
+            x: [0, 100, 0], 
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full bg-accent/5 blur-3xl"
+          animate={{ 
+            x: [0, -100, 0], 
+            y: [0, -50, 0],
+            scale: [1.2, 1, 1.2]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6"
+        className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 relative z-10"
       >
         <div className="flex items-center gap-3">
-          <ZenithLogo size={32} />
-          <span className="font-bold text-foreground">Zenith Studio</span>
+          <ZenithLogo size={36} />
+          <span className="font-bold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Zenith Studio
+          </span>
         </div>
         <ThemeSwitcher />
       </motion.header>
 
-      <div className="flex-1 flex">
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex relative z-10">
+        {/* Main Content with Logo Accent */}
+        <div className="flex-1 flex flex-col relative">
+          {/* Large decorative logo in background */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-[0.03]">
+            <ZenithLogo size={400} animated={false} />
+          </div>
+          
           {/* Progress Bar */}
           <OnboardingProgress currentStep={stepIndex} totalSteps={STEPS.length} />
           
@@ -176,7 +205,7 @@ export default function Onboarding() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -20, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                className="w-full max-w-xl"
+                className="w-full max-w-xl relative z-10"
               >
                 {renderStep()}
               </motion.div>
@@ -189,7 +218,7 @@ export default function Onboarding() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="hidden lg:block w-[450px] border-l border-border bg-card"
+          className="hidden lg:block w-[480px] border-l border-border bg-card/50 backdrop-blur-sm"
         >
           <OnboardingPreview state={state} currentStep={currentStep} />
         </motion.div>
