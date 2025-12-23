@@ -20,12 +20,16 @@ import {
   Plus,
   Calendar,
   Bell,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ZenithLogo } from '@/components/ZenithLogo';
+import { VerificationBadge, VerificationStatusCard, VerificationStatus } from '@/components/admin/VerificationBadge';
+import { useToast } from '@/hooks/use-toast';
 
 const studios = [
   { id: 'cms', name: 'CMS Studio', description: 'Create and manage content', icon: FileText, color: 'text-blue-500', bgColor: 'bg-blue-500/10', enabled: true },
@@ -51,15 +55,34 @@ const recentActivity = [
 export default function AdminDashboard() {
   const { user, profile, tenant, signOut, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [animatedStats, setAnimatedStats] = useState({ content: 0, users: 0, views: 0, growth: 0 });
+  
+  // Determine verification statuses
+  const emailStatus: VerificationStatus = user?.email_confirmed_at ? 'verified' : 'pending';
+  const phoneStatus: VerificationStatus = user?.phone_confirmed_at ? 'verified' : 'unverified';
 
   useEffect(() => {
     if (!isLoading && !user) {
       navigate('/auth');
     } else if (!isLoading && profile && !profile.onboarding_completed) {
-      navigate('/get-started');
+      navigate('/admin/onboarding');
     }
   }, [user, profile, isLoading, navigate]);
+  
+  const handleVerifyEmail = () => {
+    toast({
+      title: 'Verification email sent',
+      description: 'Check your inbox for the verification link.',
+    });
+  };
+  
+  const handleVerifyPhone = () => {
+    toast({
+      title: 'Coming Soon',
+      description: 'Phone verification will be available soon.',
+    });
+  };
 
   // Animate stats on mount
   useEffect(() => {
@@ -120,6 +143,11 @@ export default function AdminDashboard() {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Verification Badges */}
+            <div className="hidden sm:flex items-center gap-2">
+              <VerificationBadge type="email" status={emailStatus} size="sm" />
+              <VerificationBadge type="phone" status={phoneStatus} size="sm" />
+            </div>
             <Button variant="ghost" size="icon" className="relative">
               <Bell size={18} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
@@ -278,6 +306,22 @@ export default function AdminDashboard() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Verification Status */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <VerificationStatusCard
+                emailStatus={emailStatus}
+                phoneStatus={phoneStatus}
+                email={user?.email}
+                phone={user?.phone}
+                onVerifyEmail={handleVerifyEmail}
+                onVerifyPhone={handleVerifyPhone}
+              />
+            </motion.div>
+            
             {/* Getting Started Checklist */}
             <Card>
               <CardHeader className="pb-3">
