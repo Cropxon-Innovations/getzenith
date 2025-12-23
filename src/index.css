@@ -3,28 +3,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Zenith Studio Design System - 4 Clean Themes */
+/* Zenith Studio Design System - 4 Brand Themes */
 
 @layer base {
+  /* Theme: Light (Default for light mode) */
+  .theme-light {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    --primary: 217 91% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 10%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 217 91% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 55%;
+
+    --radius: 0.5rem;
+
+    --gradient-start: 217 91% 55%;
+    --gradient-end: 262 83% 58%;
+
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
   /* Theme: Dark (Default) */
   :root, .theme-dark {
-    --background: 0 0% 4%;
+    --background: 240 10% 4%;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 7%;
+    --card: 240 10% 6%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 9%;
+    --popover: 240 10% 8%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 12%;
+    --secondary: 240 5% 12%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 55%;
 
     --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
@@ -32,107 +71,85 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
+    --border: 240 4% 18%;
+    --input: 240 4% 18%;
     --ring: 217 91% 60%;
 
     --radius: 0.5rem;
+
+    --gradient-start: 217 91% 60%;
+    --gradient-end: 262 83% 58%;
 
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
 
-  /* Theme: Light */
-  .theme-light {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-
-    --primary: 217 91% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-
-    --accent: 217 91% 50%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 217 91% 50%;
-  }
-
-  /* Theme: Enterprise */
+  /* Theme: Ocean Blue (Deep professional blue) */
   .theme-enterprise {
-    --background: 222 47% 8%;
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 11%;
+    --card: 222 47% 9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 13%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 8%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 222 47% 6%;
 
-    --secondary: 222 40% 16%;
+    --secondary: 222 40% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 40% 18%;
+    --muted: 222 40% 16%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 222 47% 8%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 222 47% 6%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 222 40% 20%;
     --input: 222 40% 20%;
-    --ring: 217 91% 60%;
+    --ring: 199 89% 48%;
+
+    --gradient-start: 199 89% 48%;
+    --gradient-end: 217 91% 60%;
   }
 
-  /* Theme: High Contrast */
+  /* Theme: Sunset Orange (Warm and energetic) */
   .theme-high-contrast {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --background: 20 14% 4%;
+    --foreground: 60 9% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 20 14% 7%;
+    --card-foreground: 60 9% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover: 20 14% 9%;
+    --popover-foreground: 60 9% 98%;
 
-    --primary: 217 100% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 60 9% 98%;
 
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 20 10% 12%;
+    --secondary-foreground: 60 9% 98%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 25%;
+    --muted: 20 10% 15%;
+    --muted-foreground: 24 10% 55%;
 
-    --accent: 217 100% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 24 95% 53%;
+    --accent-foreground: 60 9% 98%;
 
-    --destructive: 0 100% 40%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 60 9% 98%;
 
-    --border: 0 0% 0%;
-    --input: 0 0% 0%;
-    --ring: 217 100% 45%;
+    --border: 20 10% 18%;
+    --input: 20 10% 18%;
+    --ring: 24 95% 53%;
+
+    --gradient-start: 24 95% 53%;
+    --gradient-end: 38 92% 50%;
   }
 
   * {

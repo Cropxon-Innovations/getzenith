@@ -38,20 +38,20 @@ export const ZenithLogo = ({ size = 48, animated = true, className = '' }: Zenit
         animate={{ pathLength: 1 }}
         transition={{ duration: 2, ease: 'easeInOut', delay: 0.5 }}
       />
-      {/* Center dot */}
+      {/* Center dot - uses currentColor for theme adaptability */}
       <motion.circle
         cx="50"
         cy="50"
         r="6"
-        fill="hsl(var(--primary))"
+        className="fill-primary"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.5, delay: 1.5 }}
       />
       <defs>
         <linearGradient id="zenithGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="hsl(var(--gradient-start))" />
-          <stop offset="100%" stopColor="hsl(var(--gradient-end))" />
+          <stop offset="0%" className="[stop-color:hsl(var(--primary))]" />
+          <stop offset="100%" className="[stop-color:hsl(var(--accent))]" />
         </linearGradient>
       </defs>
     </motion.svg>
