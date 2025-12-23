@@ -50,28 +50,48 @@ export const Header = () => {
 
             <nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => (
-                <a
+                <motion.a
                   key={item.label}
                   href={item.href}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
-                  <item.icon size={16} className="opacity-70" />
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <item.icon size={16} className="opacity-70" />
+                  </motion.div>
                   {item.label}
-                </a>
+                </motion.a>
               ))}
             </nav>
 
             <div className="hidden lg:flex items-center gap-2">
               <ThemeSwitcher />
               <Link to="/auth">
-                <Button variant="ghost" size="sm" className="font-medium text-foreground">
-                  Login
-                </Button>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
+                  <Button variant="ghost" size="sm" className="font-medium text-foreground">
+                    Login
+                  </Button>
+                </motion.div>
               </Link>
               <Link to="/auth">
-                <Button size="sm" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20">
-                  Start Free Trial
-                </Button>
+                <motion.div
+                  whileHover={{ scale: 1.03, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
+                  <Button size="sm" className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20">
+                    Start Free Trial
+                  </Button>
+                </motion.div>
               </Link>
             </div>
 
