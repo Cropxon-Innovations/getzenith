@@ -18,6 +18,10 @@ import {
   Activity,
   Plus,
   Calendar,
+  Settings,
+  CreditCard,
+  MessageSquare,
+  UserPlus,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -27,6 +31,12 @@ import { ZenithLogo } from '@/components/ZenithLogo';
 import { VerificationStatusCard, VerificationStatus } from '@/components/admin/VerificationBadge';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useToast } from '@/hooks/use-toast';
+import { DashboardMetricCard } from '@/components/admin/DashboardMetricCard';
+import { QuickActionCard } from '@/components/admin/QuickActionCard';
+import { RecentActivityList, ActivityItem } from '@/components/admin/RecentActivityList';
+import { RoleBadge } from '@/components/admin/RoleBadge';
+import { InviteUserModal } from '@/components/admin/InviteUserModal';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
 
 const studios = [
   { id: 'cms', name: 'CMS Studio', description: 'Create and manage content', icon: FileText, color: 'text-blue-500', bgColor: 'bg-blue-500/10', enabled: true },
@@ -43,17 +53,26 @@ const checklistItems = [
   { id: 'automation', label: 'Set up automation', completed: false, href: '/studio/automation' },
 ];
 
-const recentActivity = [
-  { id: 1, action: 'Workspace created', time: 'Just now', icon: Plus, color: 'text-green-500' },
-  { id: 2, action: 'Account verified', time: '2 minutes ago', icon: Check, color: 'text-blue-500' },
-  { id: 3, action: 'Onboarding completed', time: '5 minutes ago', icon: Activity, color: 'text-purple-500' },
+const quickActions = [
+  { icon: FileText, title: 'Create Content', description: 'Start writing new content', href: '/studio/cms', color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+  { icon: UserPlus, title: 'Invite Team', description: 'Add team members', href: '/admin/team', color: 'text-green-500', bgColor: 'bg-green-500/10' },
+  { icon: Settings, title: 'Settings', description: 'Configure your platform', href: '/admin/settings', color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+  { icon: CreditCard, title: 'Billing', description: 'Manage subscription', href: '/admin/billing', color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
 ];
 
 export default function AdminDashboard() {
-  const { user, profile, tenant, isLoading } = useAuth();
+  const { user, profile, tenant, userRole, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin, canManageTeam } = useRoleAccess();
   const [animatedStats, setAnimatedStats] = useState({ content: 0, users: 0, views: 0, growth: 0 });
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  
+  const recentActivity: ActivityItem[] = [
+    { id: '1', action: 'Workspace created', time: 'Just now', icon: Plus, color: 'text-green-500' },
+    { id: '2', action: 'Account verified', time: '2 minutes ago', icon: Check, color: 'text-blue-500' },
+    { id: '3', action: 'Onboarding completed', time: '5 minutes ago', icon: Activity, color: 'text-purple-500' },
+  ];
   
   // Determine verification statuses
   const emailStatus: VerificationStatus = user?.email_confirmed_at ? 'verified' : 'pending';
