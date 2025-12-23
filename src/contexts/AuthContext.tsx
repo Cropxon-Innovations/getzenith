@@ -21,6 +21,7 @@ interface Tenant {
   plan: string;
   business_type: string | null;
   business_goals: string[];
+  trial_ends_at: string | null;
 }
 
 interface AuthContextType {
