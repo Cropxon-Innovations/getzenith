@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PageTransition } from "@/components/PageTransition";
 import Index from "./pages/Index";
 import About from "./pages/About";
+import Docs from "./pages/Docs";
 import Studio from "./pages/Studio";
 import Auth from "./pages/Auth";
 import GetStarted from "./pages/GetStarted";
@@ -26,6 +27,7 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/docs" element={<PageTransition><Docs /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/get-started" element={<PageTransition><GetStarted /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
