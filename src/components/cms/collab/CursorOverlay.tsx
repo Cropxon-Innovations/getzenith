@@ -1,15 +1,40 @@
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCollaboration } from './CollaborationProvider';
 
 export const CursorOverlay = () => {
-  const { collaborators, isCollaborationEnabled } = useCollaboration();
+  const { collaborators, isCollaborationEnabled, updateCursor } = useCollaboration();
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Track local cursor position and broadcast
+  useEffect(() => {
+    if (!isCollaborationEnabled) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Throttle updates
+      updateCursor(e.clientX, e.clientY);
+    };
+
+    // Throttle to ~20fps
+    let lastUpdate = 0;
+    const throttledHandler = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastUpdate > 50) {
+        lastUpdate = now;
+        handleMouseMove(e);
+      }
+    };
+
+    window.addEventListener('mousemove', throttledHandler);
+    return () => window.removeEventListener('mousemove', throttledHandler);
+  }, [isCollaborationEnabled, updateCursor]);
 
   if (!isCollaborationEnabled || collaborators.length === 0) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50">
+    <div ref={overlayRef} className="fixed inset-0 pointer-events-none z-50">
       <AnimatePresence>
         {collaborators.map((cursor) => (
           <motion.div
@@ -22,9 +47,15 @@ export const CursorOverlay = () => {
               y: cursor.y,
             }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 500 }}
+            transition={{ 
+              type: 'spring', 
+              damping: 30, 
+              stiffness: 500,
+              x: { type: 'spring', damping: 25, stiffness: 400 },
+              y: { type: 'spring', damping: 25, stiffness: 400 },
+            }}
             className="absolute"
-            style={{ left: cursor.x, top: cursor.y }}
+            style={{ left: 0, top: 0 }}
           >
             {/* Cursor Arrow */}
             <svg
@@ -51,6 +82,9 @@ export const CursorOverlay = () => {
               style={{ backgroundColor: cursor.color }}
             >
               {cursor.name}
+              {cursor.editingSection && (
+                <span className="ml-1 opacity-75">• editing</span>
+              )}
             </motion.div>
           </motion.div>
         ))}

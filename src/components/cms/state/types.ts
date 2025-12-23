@@ -38,4 +38,12 @@ export interface CollaboratorCursor {
   x: number;
   y: number;
   lastActive: Date;
+  editingSection?: string | null;
+}
+
+export interface ContentLock {
+  section_id: string | null;
+  locked_by: string;
+  locked_by_name: string;
+  expires_at: string;
 }
