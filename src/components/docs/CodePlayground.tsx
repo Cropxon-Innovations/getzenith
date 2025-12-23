@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Copy, Check, Terminal, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SyntaxHighlighter } from './SyntaxHighlighter';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface PlaygroundExample {
   id: string;
@@ -209,12 +211,17 @@ export const CodePlayground = () => {
           </div>
           
           <div className="relative">
+            {/* Hidden textarea for editing */}
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="w-full h-[300px] p-4 font-mono text-sm bg-transparent text-foreground resize-none focus:outline-none"
+              className="absolute inset-0 w-full h-[300px] p-4 font-mono text-sm bg-transparent text-transparent caret-foreground resize-none focus:outline-none z-10"
               spellCheck={false}
             />
+            {/* Highlighted overlay */}
+            <div className="w-full h-[300px] p-4 overflow-auto pointer-events-none">
+              <SyntaxHighlighter code={code} language="typescript" showLineNumbers={true} />
+            </div>
           </div>
 
           <div className="px-4 py-3 border-t border-border bg-muted/30">
@@ -267,7 +274,9 @@ export const CodePlayground = () => {
                 <p className="text-sm text-destructive">{error}</p>
               </div>
             ) : output ? (
-              <pre className="font-mono text-sm text-green-400 whitespace-pre-wrap">{output}</pre>
+              <div className="overflow-auto">
+                <SyntaxHighlighter code={output} language="json" showLineNumbers={false} />
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full">
                 <p className="text-sm text-muted-foreground">Click "Run Code" to see the output</p>

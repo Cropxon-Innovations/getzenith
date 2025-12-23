@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Book, Code, Zap, Server, Puzzle, Bot, Workflow,
   ChevronRight, Search, ExternalLink, Copy, Check,
@@ -230,55 +231,62 @@ const Docs = () => {
               </motion.h2>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {docCategories.map((category, index) => (
-                  <motion.div
-                    key={category.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -4 }}
-                    onClick={() => setActiveCategory(category.id)}
-                    className={`p-6 rounded-xl border cursor-pointer transition-all ${
-                      activeCategory === category.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border bg-card hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
+                {docCategories.map((category, index) => {
+                  const categoryRoutes: Record<string, string> = {
+                    'getting-started': '/docs/getting-started',
+                    'api-reference': '/docs/api-reference',
+                    'sdk': '/docs/sdk',
+                    'integrations': '/docs/integrations',
+                    'ai-systems': '/docs/ai-systems',
+                    'automation': '/docs/automation',
+                  };
+                  
+                  return (
+                    <Link key={category.id} to={categoryRoutes[category.id] || '/docs'}>
                       <motion.div
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
-                        className="w-12 h-12 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: `${category.color}20` }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ y: -4 }}
+                        className="p-6 rounded-xl border cursor-pointer transition-all border-border bg-card hover:border-primary/50 h-full"
                       >
-                        <category.icon size={22} style={{ color: category.color }} />
-                      </motion.div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-foreground mb-1">{category.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-4">{category.description}</p>
-                        
-                        <div className="space-y-2">
-                          {category.articles.map((article, i) => (
-                            <motion.div
-                              key={article.title}
-                              initial={{ opacity: 0, x: -10 }}
-                              whileInView={{ opacity: 1, x: 0 }}
-                              viewport={{ once: true }}
-                              transition={{ delay: 0.3 + i * 0.1 }}
-                              className="flex items-center justify-between text-sm group"
-                            >
-                              <span className="text-muted-foreground group-hover:text-foreground transition-colors">
-                                {article.title}
-                              </span>
-                              <span className="text-xs text-muted-foreground/50">{article.time}</span>
-                            </motion.div>
-                          ))}
+                        <div className="flex items-start gap-4">
+                          <motion.div
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
+                            className="w-12 h-12 rounded-xl flex items-center justify-center"
+                            style={{ backgroundColor: `${category.color}20` }}
+                          >
+                            <category.icon size={22} style={{ color: category.color }} />
+                          </motion.div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-foreground mb-1">{category.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-4">{category.description}</p>
+                            
+                            <div className="space-y-2">
+                              {category.articles.map((article, i) => (
+                                <motion.div
+                                  key={article.title}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  whileInView={{ opacity: 1, x: 0 }}
+                                  viewport={{ once: true }}
+                                  transition={{ delay: 0.3 + i * 0.1 }}
+                                  className="flex items-center justify-between text-sm group"
+                                >
+                                  <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                                    {article.title}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground/50">{article.time}</span>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+                      </motion.div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </section>
