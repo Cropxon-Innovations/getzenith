@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Bell, Search, User, Settings, HelpCircle } from 'lucide-react';
+import { Bell, Search, User, Settings, HelpCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 
@@ -11,17 +11,31 @@ const studioTitles: Record<string, string> = {
   automation: 'Automation Studio',
 };
 
-export const StudioHeader = () => {
+interface StudioHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export const StudioHeader = ({ onMenuClick }: StudioHeaderProps) => {
   const { studioType = 'cms' } = useParams();
   const title = studioTitles[studioType] || 'Studio';
 
   return (
-    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-between px-6">
-      {/* Left: Breadcrumb / Title */}
-      <div className="flex items-center gap-4">
+    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 md:px-6">
+      {/* Left: Mobile Menu + Title */}
+      <div className="flex items-center gap-3">
+        {/* Mobile hamburger */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu size={20} />
+        </Button>
+        
         <h1 className="text-lg font-semibold">{title}</h1>
-        <span className="text-muted-foreground">/</span>
-        <span className="text-sm text-muted-foreground">Overview</span>
+        <span className="text-muted-foreground hidden sm:inline">/</span>
+        <span className="text-sm text-muted-foreground hidden sm:inline">Overview</span>
       </div>
 
       {/* Center: Search */}
@@ -40,7 +54,7 @@ export const StudioHeader = () => {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 md:gap-2">
         <ThemeSwitcher />
         
         <Button variant="ghost" size="icon" className="relative">
@@ -48,15 +62,15 @@ export const StudioHeader = () => {
           <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
         </Button>
         
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="hidden sm:flex">
           <HelpCircle size={20} />
         </Button>
         
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="hidden sm:flex">
           <Settings size={20} />
         </Button>
         
-        <div className="w-px h-8 bg-border mx-2" />
+        <div className="w-px h-8 bg-border mx-1 md:mx-2 hidden sm:block" />
         
         <Button variant="ghost" size="sm" className="gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">

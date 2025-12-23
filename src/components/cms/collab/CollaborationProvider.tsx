@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { CollaboratorCursor, UserRole, PlanTier } from '../state/types';
+import { CollaboratorCursor, UserRole, PlanTier, ContentLock } from '../state/types';
+import { supabase } from '@/integrations/supabase/client';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -12,12 +14,17 @@ interface User {
 interface CollaborationContextType {
   currentUser: User;
   collaborators: CollaboratorCursor[];
+  locks: ContentLock[];
   plan: PlanTier;
   isCollaborationEnabled: boolean;
   updateCursor: (x: number, y: number) => void;
   canEdit: boolean;
   canPublish: boolean;
   canManageUsers: boolean;
+  acquireLock: (sectionId: string | null) => Promise<boolean>;
+  releaseLock: (sectionId: string | null) => Promise<void>;
+  isLocked: (sectionId: string | null) => boolean;
+  getLockOwner: (sectionId: string | null) => string | null;
 }
 
 const COLORS = [
@@ -45,8 +52,10 @@ export const CollaborationProvider: React.FC<CollaborationProviderProps> = ({ ch
   // Mock plan tier - in production this would come from subscription
   const [plan] = useState<PlanTier>('pro');
 
-  // Mock collaborators - in production this would come from Supabase Realtime
+  // Collaborators from Supabase Realtime Presence
   const [collaborators, setCollaborators] = useState<CollaboratorCursor[]>([]);
+  const [locks, setLocks] = useState<ContentLock[]>([]);
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   const isCollaborationEnabled = plan !== 'free';
 
@@ -55,52 +64,107 @@ export const CollaborationProvider: React.FC<CollaborationProviderProps> = ({ ch
   const canPublish = ['tenant_admin', 'editor'].includes(currentUser.role);
   const canManageUsers = currentUser.role === 'tenant_admin';
 
-  // Update local cursor position
-  const updateCursor = useCallback((x: number, y: number) => {
-    if (!isCollaborationEnabled) return;
-    
-    // In production, this would broadcast to Supabase Realtime
-    // For now, we just log it
-    // console.log('Cursor update:', { x, y, user: currentUser.name });
-  }, [isCollaborationEnabled, currentUser.name]);
-
-  // Simulate other collaborators (demo purposes)
+  // Set up Supabase Realtime Presence
   useEffect(() => {
     if (!isCollaborationEnabled || !contentId) return;
 
-    // Mock collaborator for demo
-    const mockCollaborators: CollaboratorCursor[] = [
-      {
-        id: 'user-2',
-        name: 'Sarah Chen',
-        color: COLORS[1],
-        x: 0,
-        y: 0,
-        lastActive: new Date(),
-      },
-    ];
+    const channelName = `content:${contentId}`;
+    const realtimeChannel = supabase.channel(channelName, {
+      config: { presence: { key: currentUser.id } }
+    });
 
-    // Only show if this is an existing content (not new)
-    if (!contentId.startsWith('new') && !contentId.startsWith('content-')) {
-      setCollaborators(mockCollaborators);
-    } else {
-      setCollaborators([]);
-    }
+    realtimeChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = realtimeChannel.presenceState();
+        const others: CollaboratorCursor[] = [];
+        
+        Object.entries(state).forEach(([key, presences]) => {
+          if (key !== currentUser.id && presences.length > 0) {
+            const presence = presences[0] as any;
+            others.push({
+              id: key,
+              name: presence.user_name || 'Anonymous',
+              color: presence.color || COLORS[Math.floor(Math.random() * COLORS.length)],
+              x: presence.x || 0,
+              y: presence.y || 0,
+              lastActive: new Date(),
+              editingSection: presence.editing_section,
+            });
+          }
+        });
+        
+        setCollaborators(others);
+      })
+      .on('presence', { event: 'leave' }, ({ key }) => {
+        setCollaborators(prev => prev.filter(c => c.id !== key));
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await realtimeChannel.track({
+            user_name: currentUser.name,
+            color: currentUser.color,
+            x: 0,
+            y: 0,
+            editing_section: null,
+          });
+        }
+      });
 
-    return () => setCollaborators([]);
-  }, [isCollaborationEnabled, contentId]);
+    setChannel(realtimeChannel);
+
+    return () => {
+      realtimeChannel.unsubscribe();
+    };
+  }, [contentId, isCollaborationEnabled, currentUser]);
+
+  // Update local cursor position and broadcast
+  const updateCursor = useCallback((x: number, y: number) => {
+    if (!channel || !isCollaborationEnabled) return;
+    
+    channel.track({
+      user_name: currentUser.name,
+      color: currentUser.color,
+      x,
+      y,
+      editing_section: null,
+    });
+  }, [channel, currentUser, isCollaborationEnabled]);
+
+  // Lock management
+  const acquireLock = useCallback(async (sectionId: string | null): Promise<boolean> => {
+    // Mock implementation - in production use database
+    return true;
+  }, []);
+
+  const releaseLock = useCallback(async (sectionId: string | null): Promise<void> => {
+    // Mock implementation - in production use database
+  }, []);
+
+  const isLocked = useCallback((sectionId: string | null): boolean => {
+    return locks.some(l => l.section_id === sectionId && l.locked_by !== currentUser.id);
+  }, [locks, currentUser.id]);
+
+  const getLockOwner = useCallback((sectionId: string | null): string | null => {
+    const lock = locks.find(l => l.section_id === sectionId && l.locked_by !== currentUser.id);
+    return lock?.locked_by_name || null;
+  }, [locks, currentUser.id]);
 
   return (
     <CollaborationContext.Provider
       value={{
         currentUser,
         collaborators,
+        locks,
         plan,
         isCollaborationEnabled,
         updateCursor,
         canEdit,
         canPublish,
         canManageUsers,
+        acquireLock,
+        releaseLock,
+        isLocked,
+        getLockOwner,
       }}
     >
       {children}
