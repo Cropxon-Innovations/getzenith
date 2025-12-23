@@ -20,6 +20,8 @@ import {
   MessageSquare,
   Video,
   TrendingUp,
+  Plug,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -70,15 +72,6 @@ const adminNavigation: NavGroup[] = [
     ],
   },
   {
-    title: 'Team',
-    roles: ['tenant_admin'],
-    items: [
-      { icon: Users, label: 'Members', href: '/admin/team', roles: ['tenant_admin'] },
-      { icon: Shield, label: 'Roles & Permissions', href: '/admin/team/roles', roles: ['tenant_admin'] },
-      { icon: Bell, label: 'Invitations', href: '/admin/team/invites', roles: ['tenant_admin'] },
-    ],
-  },
-  {
     title: 'Content',
     roles: ['tenant_admin', 'editor', 'mentor'],
     items: [
@@ -88,12 +81,29 @@ const adminNavigation: NavGroup[] = [
     ],
   },
   {
-    title: 'Settings',
+    title: 'Team',
     roles: ['tenant_admin'],
     items: [
-      { icon: Building2, label: 'General', href: '/admin/settings', roles: ['tenant_admin'] },
-      { icon: Paintbrush, label: 'Branding', href: '/admin/settings?tab=branding', roles: ['tenant_admin'] },
-      { icon: Link2, label: 'Domains', href: '/admin/settings?tab=domains', roles: ['tenant_admin'] },
+      { icon: Users, label: 'Members', href: '/admin/team', roles: ['tenant_admin'] },
+      { icon: Shield, label: 'Roles & Permissions', href: '/admin/team/roles', roles: ['tenant_admin'] },
+      { icon: Bell, label: 'Invitations', href: '/admin/team/invites', roles: ['tenant_admin'] },
+    ],
+  },
+  {
+    title: 'Business',
+    roles: ['tenant_admin'],
+    items: [
+      { icon: Briefcase, label: 'Business Settings', href: '/admin/business', roles: ['tenant_admin'] },
+      { icon: Paintbrush, label: 'Branding', href: '/admin/business?tab=branding', roles: ['tenant_admin'] },
+      { icon: Link2, label: 'Domains', href: '/admin/business?tab=domains', roles: ['tenant_admin'] },
+    ],
+  },
+  {
+    title: 'Platform',
+    roles: ['tenant_admin'],
+    items: [
+      { icon: Plug, label: 'Integrations', href: '/admin/integrations', roles: ['tenant_admin'] },
+      { icon: Building2, label: 'Settings', href: '/admin/settings', roles: ['tenant_admin'] },
       { icon: CreditCard, label: 'Billing', href: '/admin/settings?tab=billing', roles: ['tenant_admin'] },
     ],
   },
