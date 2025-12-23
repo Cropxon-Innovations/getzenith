@@ -8,7 +8,6 @@ import { SystemsSection } from '@/components/SystemsSection';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { SolutionsSection } from '@/components/SolutionsSection';
 import { TrustSection } from '@/components/TrustSection';
-import { LivePlatformPreview } from '@/components/platform-preview/LivePlatformPreview';
 import { CTASection } from '@/components/CTASection';
 import { Footer } from '@/components/Footer';
 import { SplashScreen } from '@/components/SplashScreen';
@@ -34,20 +33,21 @@ const Index = () => {
         <main>
           <HeroSection />
           
+          {/* Live Platform Preview - directly after Hero for immediate engagement */}
           <ScrollAnimationWrapper delay={0}>
+            <HowItWorksSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0.1}>
             <FeaturesSection />
           </ScrollAnimationWrapper>
           
-          <ScrollAnimationWrapper delay={0.1}>
+          <ScrollAnimationWrapper delay={0}>
             <ProblemSection />
           </ScrollAnimationWrapper>
           
-          <ScrollAnimationWrapper delay={0}>
-            <SystemsSection />
-          </ScrollAnimationWrapper>
-          
           <ScrollAnimationWrapper delay={0.1}>
-            <HowItWorksSection />
+            <SystemsSection />
           </ScrollAnimationWrapper>
           
           <ScrollAnimationWrapper delay={0}>
@@ -59,10 +59,6 @@ const Index = () => {
           </ScrollAnimationWrapper>
           
           <ScrollAnimationWrapper delay={0}>
-            <LivePlatformPreview />
-          </ScrollAnimationWrapper>
-          
-          <ScrollAnimationWrapper delay={0.1}>
             <CTASection />
           </ScrollAnimationWrapper>
         </main>
