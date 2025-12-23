@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ZenithLogo } from './ZenithLogo';
 import { Link } from 'react-router-dom';
 import { LiveDashboardPreview } from './hero/LiveDashboardPreview';
+import { DemoModal } from './demo/DemoModal';
 
 export const HeroSection = () => {
-  return (
+  const [demoOpen, setDemoOpen] = useState(false);
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
       {/* Background gradient - theme aware */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/30" />
@@ -149,12 +151,16 @@ export const HeroSection = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
+                onClick={() => setDemoOpen(true)}
                 className="gap-2 text-base font-medium px-6 sm:px-8 w-full sm:w-auto border-border text-foreground hover:bg-secondary hover:text-foreground"
               >
                 <Play size={18} className="text-primary" />
                 See How It Works
               </Button>
             </motion.div>
+
+            {/* Demo Modal */}
+            <DemoModal open={demoOpen} onOpenChange={setDemoOpen} />
 
             {/* Social proof */}
             <motion.div
