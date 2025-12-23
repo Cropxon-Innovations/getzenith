@@ -1,198 +1,357 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { Rocket, Building2, GraduationCap, Briefcase, User, ArrowRight } from 'lucide-react';
+import { 
+  Rocket, Building2, GraduationCap, Briefcase, User, 
+  ArrowRight, FileText, Globe, Zap, BarChart3,
+  Users, BookOpen, Settings, CheckCircle2
+} from 'lucide-react';
 
 const solutions = [
   {
     id: 'solopreneurs',
     icon: User,
     title: 'Solopreneurs',
-    description: 'Serious individuals ready to scale without the complexity.',
-    features: ['All-in-one platform', 'No technical overhead', 'Focus on growth'],
-    dashboardPreview: 'Solopreneur Dashboard',
-    color: 'from-cyan-500 to-blue-500',
+    tagline: 'Scale without complexity',
+    color: '#06B6D4',
+    modules: ['CMS', 'Website', 'Automation'],
+    stats: { metric: '10x', label: 'Faster Launch' },
   },
   {
     id: 'startups',
     icon: Rocket,
     title: 'Startups',
-    description: 'Ship faster with an integrated platform that grows with you.',
-    features: ['Quick launch templates', 'Built-in analytics', 'Scalable infrastructure'],
-    dashboardPreview: 'Startup Dashboard',
-    color: 'from-orange-500 to-red-500',
+    tagline: 'Ship faster, iterate quicker',
+    color: '#F59E0B',
+    modules: ['CMS', 'Website', 'LMS', 'Automation'],
+    stats: { metric: '60%', label: 'Cost Saved' },
   },
   {
     id: 'agencies',
     icon: Briefcase,
     title: 'Agencies',
-    description: 'Manage multiple client projects from a single control center.',
-    features: ['Multi-tenant workspaces', 'White-label options', 'Client collaboration'],
-    dashboardPreview: 'Agency Dashboard',
-    color: 'from-blue-500 to-purple-500',
+    tagline: 'Manage all clients in one place',
+    color: '#8B5CF6',
+    modules: ['Multi-tenant', 'White-label', 'Analytics'],
+    stats: { metric: '50+', label: 'Clients Managed' },
   },
   {
     id: 'educators',
     icon: GraduationCap,
     title: 'Educators',
-    description: 'Create learning experiences that engage and certify.',
-    features: ['Course builder', 'Progress tracking', 'Certification system'],
-    dashboardPreview: 'Education Dashboard',
-    color: 'from-green-500 to-teal-500',
+    tagline: 'Engage and certify learners',
+    color: '#10B981',
+    modules: ['LMS', 'Assessments', 'Certificates'],
+    stats: { metric: '95%', label: 'Completion Rate' },
   },
   {
     id: 'enterprises',
     icon: Building2,
     title: 'Enterprises',
-    description: 'Enterprise-grade security with startup-speed deployment.',
-    features: ['SSO integration', 'Custom SLAs', 'Dedicated support'],
-    dashboardPreview: 'Enterprise Dashboard',
-    color: 'from-purple-500 to-pink-500',
+    tagline: 'Enterprise security, startup speed',
+    color: '#EC4899',
+    modules: ['SSO', 'Custom SLA', 'Dedicated Support'],
+    stats: { metric: '99.9%', label: 'Uptime' },
   },
 ];
+
+const moduleIcons: Record<string, any> = {
+  'CMS': FileText,
+  'Website': Globe,
+  'Automation': Zap,
+  'LMS': BookOpen,
+  'Multi-tenant': Users,
+  'White-label': Settings,
+  'Analytics': BarChart3,
+  'Assessments': CheckCircle2,
+  'Certificates': GraduationCap,
+  'SSO': Building2,
+  'Custom SLA': FileText,
+  'Dedicated Support': Users,
+};
 
 export const SolutionsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Auto-rotate through solutions
+  useEffect(() => {
+    if (!isAutoPlaying || !isInView) return;
+    
+    const interval = setInterval(() => {
+      setActiveIndex(prev => (prev + 1) % solutions.length);
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, isInView]);
+
+  const activeSolution = solutions[activeIndex];
 
   return (
-    <section id="solutions" className="py-24 sm:py-32 relative" ref={ref}>
-      {/* Ambient background - persistent */}
-      <motion.div 
-        animate={{ 
-          background: [
-            'radial-gradient(ellipse at 20% 50%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
-            'radial-gradient(ellipse at 80% 50%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
-            'radial-gradient(ellipse at 20% 50%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
-          ]
+    <section id="solutions" className="py-24 sm:py-32 relative overflow-hidden" ref={ref}>
+      {/* Dynamic background based on active solution */}
+      <motion.div
+        key={activeSolution.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at 50% 50%, ${activeSolution.color}08 0%, transparent 60%)`
         }}
-        transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute inset-0" 
       />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Section header - animate once and stay */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
         >
           <span className="text-xs sm:text-sm uppercase tracking-widest text-muted-foreground">
-            Adaptive Configurations
+            Built For Everyone
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-4 sm:mb-6">
-            One Platform. <span className="text-gradient">Your Configuration.</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-4">
+            One Platform. <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Your Way.</span>
           </h2>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-            The same powerful platform, configured to match how you work.
-          </p>
         </motion.div>
 
-        {/* Solutions grid - animate once and stay */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {solutions.map((solution, index) => (
-            <motion.div
-              key={solution.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              onMouseEnter={() => setHoveredId(solution.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className={`group relative ${index === 0 ? 'md:col-span-2 lg:col-span-1' : ''}`}
-            >
-              <motion.div 
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.2 }}
-                className="h-full p-6 sm:p-8 rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:border-primary/50"
-              >
-                {/* Background gradient on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${solution.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Left: Solution selector */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-3"
+          >
+            {solutions.map((solution, index) => {
+              const isActive = activeIndex === index;
+              const Icon = solution.icon;
 
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-4 sm:mb-6">
-                    <motion.div 
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, delay: index * 0.3 }}
-                      whileHover={{ rotate: 5, scale: 1.05 }}
-                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors"
-                    >
-                      <solution.icon size={24} className="text-primary sm:w-7 sm:h-7" />
-                    </motion.div>
+              return (
+                <motion.button
+                  key={solution.id}
+                  onClick={() => {
+                    setActiveIndex(index);
+                    setIsAutoPlaying(false);
+                  }}
+                  className={`w-full text-left p-4 sm:p-5 rounded-xl border transition-all relative overflow-hidden ${
+                    isActive
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border bg-card hover:border-muted-foreground'
+                  }`}
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  {/* Progress bar for active */}
+                  {isActive && isAutoPlaying && (
                     <motion.div
-                      animate={{ x: hoveredId === solution.id ? 5 : 0 }}
-                      transition={{ duration: 0.2 }}
+                      className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 4, ease: 'linear' }}
+                      key={`progress-${activeIndex}`}
+                    />
+                  )}
+
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      animate={isActive ? { scale: [1, 1.1, 1] } : {}}
+                      transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ 
+                        backgroundColor: isActive ? `${solution.color}20` : 'hsl(var(--muted))',
+                      }}
                     >
-                      <ArrowRight size={18} className="text-muted-foreground group-hover:text-primary transition-all sm:w-5 sm:h-5" />
+                      <Icon 
+                        size={22} 
+                        style={{ color: isActive ? solution.color : 'hsl(var(--muted-foreground))' }}
+                      />
+                    </motion.div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className={`text-base sm:text-lg font-semibold ${
+                          isActive ? 'text-foreground' : 'text-muted-foreground'
+                        }`}>
+                          {solution.title}
+                        </h3>
+                        {isActive && (
+                          <motion.div
+                            initial={{ opacity: 0, x: -5 }}
+                            animate={{ opacity: 1, x: 0 }}
+                          >
+                            <ArrowRight size={16} className="text-primary" />
+                          </motion.div>
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                        {solution.tagline}
+                      </p>
+                    </div>
+
+                    {/* Stat badge */}
+                    <div className={`text-right ${isActive ? 'opacity-100' : 'opacity-50'}`}>
+                      <span 
+                        className="text-lg sm:text-xl font-bold"
+                        style={{ color: isActive ? solution.color : 'hsl(var(--muted-foreground))' }}
+                      >
+                        {solution.stats.metric}
+                      </span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground block">
+                        {solution.stats.label}
+                      </span>
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </motion.div>
+
+          {/* Right: Visual preview */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="relative"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSolution.id}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.4 }}
+                className="rounded-2xl border border-border bg-card overflow-hidden shadow-xl"
+                style={{ boxShadow: `0 20px 60px -20px ${activeSolution.color}30` }}
+              >
+                {/* Browser header */}
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-destructive/60" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="px-3 py-1 rounded-md bg-background border border-border text-xs text-muted-foreground">
+                      {activeSolution.title.toLowerCase()}.zenith.app
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dashboard content */}
+                <div className="p-6 min-h-[300px]">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <motion.h4
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-lg font-bold text-foreground"
+                      >
+                        {activeSolution.title} Dashboard
+                      </motion.h4>
+                      <p className="text-xs text-muted-foreground">{activeSolution.tagline}</p>
+                    </div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: 'spring' }}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium"
+                      style={{ 
+                        backgroundColor: `${activeSolution.color}20`,
+                        color: activeSolution.color
+                      }}
+                    >
+                      {activeSolution.stats.metric} {activeSolution.stats.label}
                     </motion.div>
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{solution.title}</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{solution.description}</p>
+                  {/* Active modules */}
+                  <div className="mb-6">
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider mb-3 block">
+                      Active Modules
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {activeSolution.modules.map((module, i) => {
+                        const ModuleIcon = moduleIcons[module] || Settings;
+                        return (
+                          <motion.div
+                            key={module}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.1 + i * 0.1 }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-background"
+                          >
+                            <ModuleIcon size={14} style={{ color: activeSolution.color }} />
+                            <span className="text-xs font-medium">{module}</span>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                  <ul className="space-y-2 mb-4 sm:mb-6">
-                    {solution.features.map((feature, featureIndex) => (
-                      <motion.li 
-                        key={feature} 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 + featureIndex * 0.05 }}
-                        className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground"
-                      >
-                        <motion.div 
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 3, repeat: Infinity, delay: featureIndex * 0.5 }}
-                          className="w-1.5 h-1.5 rounded-full bg-primary" 
-                        />
-                        {feature}
-                      </motion.li>
-                    ))}
-                  </ul>
-
-                  {/* Dashboard preview mockup */}
-                  <AnimatePresence>
-                    {hoveredId === solution.id && (
+                  {/* Visual metrics */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'Projects', value: Math.floor(Math.random() * 50) + 10 },
+                      { label: 'Users', value: Math.floor(Math.random() * 500) + 100 },
+                      { label: 'Active', value: `${Math.floor(Math.random() * 30) + 70}%` },
+                    ].map((stat, i) => (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, height: 0 }}
-                        animate={{ opacity: 1, y: 0, height: 'auto' }}
-                        exit={{ opacity: 0, y: 10, height: 0 }}
-                        className="mt-4 p-3 sm:p-4 rounded-lg bg-secondary/50 border border-border overflow-hidden"
+                        key={stat.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 + i * 0.1 }}
+                        className="p-3 rounded-lg bg-muted/50 text-center"
                       >
-                        <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-destructive/50" />
-                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/50" />
-                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500/50" />
-                        </div>
-                        <div className="space-y-2">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: '75%' }}
-                            transition={{ duration: 0.3 }}
-                            className="h-1.5 sm:h-2 bg-border rounded" 
-                          />
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: '50%' }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                            className="h-1.5 sm:h-2 bg-border rounded" 
-                          />
-                          <motion.div 
-                            initial={{ width: 0, opacity: 0 }}
-                            animate={{ width: '100%', opacity: 1 }}
-                            transition={{ duration: 0.3, delay: 0.2 }}
-                            className="h-6 sm:h-8 bg-border/50 rounded mt-2 sm:mt-3" 
-                          />
-                        </div>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 text-center">
-                          {solution.dashboardPreview}
-                        </p>
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-xl font-bold block"
+                          style={{ color: activeSolution.color }}
+                        >
+                          {stat.value}
+                        </motion.span>
+                        <span className="text-[10px] text-muted-foreground">{stat.label}</span>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
+                    ))}
+                  </div>
+
+                  {/* Activity visualization */}
+                  <div className="mt-6 pt-4 border-t border-border">
+                    <span className="text-xs text-muted-foreground mb-2 block">Activity</span>
+                    <div className="flex items-end gap-1 h-12">
+                      {Array.from({ length: 20 }).map((_, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ height: 0 }}
+                          animate={{ height: `${20 + Math.random() * 80}%` }}
+                          transition={{ delay: 0.4 + i * 0.02, duration: 0.3 }}
+                          className="flex-1 rounded-t"
+                          style={{ 
+                            backgroundColor: i > 15 ? activeSolution.color : `${activeSolution.color}40`
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </motion.div>
+            </AnimatePresence>
+
+            {/* Floating badges */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute -top-4 -right-4 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: activeSolution.color }}
+            >
+              <activeSolution.icon size={28} className="text-white" />
             </motion.div>
-          ))}
+          </motion.div>
         </div>
       </div>
     </section>
