@@ -20,6 +20,7 @@ import Automation from "./pages/docs/Automation";
 import Studio from "./pages/Studio";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
+import EmailConfirmation from "./pages/EmailConfirmation";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +46,7 @@ const AnimatedRoutes = () => {
         <Route path="/get-started" element={<PageTransition><Onboarding /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
         <Route path="/admin/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
+        <Route path="/auth/confirm" element={<PageTransition><EmailConfirmation /></PageTransition>} />
         <Route path="/studio/:studioType" element={<PageTransition><Studio /></PageTransition>} />
         <Route path="/studio" element={<PageTransition><Studio /></PageTransition>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
