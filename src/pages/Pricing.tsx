@@ -9,6 +9,8 @@ import { Footer } from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { FeatureComparisonTable } from '@/components/pricing/FeatureComparisonTable';
+import { EnterpriseContactForm } from '@/components/pricing/EnterpriseContactForm';
 
 const plans = [
   {
@@ -345,6 +347,9 @@ const Pricing = () => {
             </div>
           </section>
 
+          {/* Feature Comparison Table */}
+          <FeatureComparisonTable />
+
           {/* FAQs */}
           <section className="py-16 sm:py-24">
             <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
@@ -395,6 +400,9 @@ const Pricing = () => {
               </div>
             </div>
           </section>
+
+          {/* Enterprise Contact Form */}
+          <EnterpriseContactForm />
 
           {/* CTA */}
           <section className="py-16 sm:py-24 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">

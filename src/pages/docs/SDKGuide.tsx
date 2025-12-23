@@ -9,6 +9,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
+import { CodePlayground } from '@/components/docs/CodePlayground';
 
 const sdks = [
   { 
@@ -297,6 +298,9 @@ const SDKGuide = () => {
                 </code>
               </pre>
             </motion.div>
+
+            {/* Interactive Playground */}
+            <CodePlayground />
 
             {/* Advanced Topics */}
             <motion.div
