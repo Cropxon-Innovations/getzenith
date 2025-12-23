@@ -124,8 +124,9 @@ const adminNavigation: NavGroup[] = [
     defaultOpen: false,
     items: [
       { icon: Plug, label: 'Integrations', href: '/admin/integrations', roles: ['tenant_admin'] },
+      { icon: Bell, label: 'Notifications', href: '/admin/notifications', roles: ['tenant_admin'] },
+      { icon: CreditCard, label: 'Billing', href: '/admin/billing', roles: ['tenant_admin'] },
       { icon: Building2, label: 'Settings', href: '/admin/settings', roles: ['tenant_admin'] },
-      { icon: CreditCard, label: 'Billing', href: '/admin/settings?tab=billing', roles: ['tenant_admin'] },
     ],
   },
 ];
