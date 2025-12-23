@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Loader2, ArrowRight, Building2, Shield, Users, Zap, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -159,7 +160,35 @@ export default function Auth() {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/admin/onboarding`,
+        },
+      });
+      
+      if (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Login failed',
+          description: error.message,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Login failed',
+        description: 'An unexpected error occurred',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleComingSoon = (provider: string) => {
     toast({
       title: 'Coming Soon',
       description: `${provider} login will be available soon.`,
@@ -219,19 +248,22 @@ export default function Auth() {
                 <SocialButton 
                   icon={<GoogleIcon />} 
                   label="Google"
-                  onClick={() => handleSocialLogin('Google')}
+                  onClick={() => handleSocialLogin('google')}
+                  disabled={isLoading}
                 />
                 <SocialButton 
                   icon={<MicrosoftIcon />} 
                   label="Microsoft"
-                  onClick={() => handleSocialLogin('Microsoft')}
+                  onClick={() => handleComingSoon('Microsoft')}
+                  comingSoon
                 />
               </div>
               <div className="grid grid-cols-2 gap-2.5">
                 <SocialButton 
                   icon={<GitHubIcon />} 
                   label="GitHub"
-                  onClick={() => handleSocialLogin('GitHub')}
+                  onClick={() => handleSocialLogin('github')}
+                  disabled={isLoading}
                 />
                 <SocialButton 
                   icon={<CropXonIcon />} 
@@ -244,7 +276,8 @@ export default function Auth() {
               <SocialButton
                 icon={<Building2 size={18} className="text-muted-foreground" />}
                 label="Enterprise SSO"
-                onClick={() => handleSocialLogin('SSO')}
+                onClick={() => handleComingSoon('SSO')}
+                comingSoon
               />
             </motion.div>
 
