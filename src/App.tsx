@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Studio from "./pages/Studio";
 import Auth from "./pages/Auth";
+import GetStarted from "./pages/GetStarted";
 import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/get-started" element={<PageTransition><GetStarted /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
         <Route path="/admin/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
         <Route path="/studio/:studioType" element={<PageTransition><Studio /></PageTransition>} />

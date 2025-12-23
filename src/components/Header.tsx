@@ -82,7 +82,7 @@ export const Header = () => {
                   </Button>
                 </motion.div>
               </Link>
-              <Link to="/auth">
+              <Link to="/get-started">
                 <motion.div
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}

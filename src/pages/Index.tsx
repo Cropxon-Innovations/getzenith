@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { SEO } from '@/components/SEO';
@@ -12,10 +12,10 @@ import { LivePlatformPreview } from '@/components/platform-preview/LivePlatformP
 import { CTASection } from '@/components/CTASection';
 import { Footer } from '@/components/Footer';
 import { SplashScreen } from '@/components/SplashScreen';
+import { ScrollAnimationWrapper } from '@/components/ScrollAnimationWrapper';
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(() => {
-    // Only show splash once per session
     const hasSeenSplash = sessionStorage.getItem('zenith-splash-seen');
     return !hasSeenSplash;
   });
@@ -33,14 +33,38 @@ const Index = () => {
         <Header />
         <main>
           <HeroSection />
-          <FeaturesSection />
-          <ProblemSection />
-          <SystemsSection />
-          <HowItWorksSection />
-          <SolutionsSection />
-          <TrustSection />
-          <LivePlatformPreview />
-          <CTASection />
+          
+          <ScrollAnimationWrapper delay={0}>
+            <FeaturesSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0.1}>
+            <ProblemSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0}>
+            <SystemsSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0.1}>
+            <HowItWorksSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0}>
+            <SolutionsSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0.1}>
+            <TrustSection />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0}>
+            <LivePlatformPreview />
+          </ScrollAnimationWrapper>
+          
+          <ScrollAnimationWrapper delay={0.1}>
+            <CTASection />
+          </ScrollAnimationWrapper>
         </main>
         <Footer />
       </div>
