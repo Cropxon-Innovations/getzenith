@@ -1,1 +1,10 @@
 project_id = "vyqtnhpftgqjtupaqfae"
+
+[functions.razorpay-checkout]
+verify_jwt = true
+
+[functions.razorpay-webhook]
+verify_jwt = false
+
+[functions.send-meeting-invite]
+verify_jwt = true

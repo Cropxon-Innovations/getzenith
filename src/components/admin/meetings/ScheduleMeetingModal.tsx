@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format, addHours } from 'date-fns';
-import { Calendar as CalendarIcon, Clock, Users, Video, X, Send, Mail, Phone } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Video, X, Send, Mail, Phone, AlertTriangle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -26,9 +26,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useMeetings } from '@/hooks/useMeetings';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+
+const PLAN_LIMITS: Record<string, number> = {
+  free: 2,
+  pro: 100,
+  enterprise: 100,
+};
 
 interface ScheduleMeetingModalProps {
   open: boolean;
@@ -63,6 +72,7 @@ export const ScheduleMeetingModal = ({
 }: ScheduleMeetingModalProps) => {
   const { toast } = useToast();
   const { createMeeting } = useMeetings();
+  const { tenant, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -74,9 +84,24 @@ export const ScheduleMeetingModal = ({
     newEmail: '',
   });
 
+  const tenantPlan = tenant?.plan || 'free';
+  const participantLimit = PLAN_LIMITS[tenantPlan] || 2;
+  const isOverLimit = formData.participantEmails.length >= participantLimit;
+
   const handleAddParticipant = () => {
     const email = formData.newEmail.trim();
-    if (email && !formData.participantEmails.includes(email)) {
+    if (!email) return;
+
+    if (formData.participantEmails.length >= participantLimit) {
+      toast({
+        title: 'Participant Limit Reached',
+        description: `Your ${tenantPlan} plan allows up to ${participantLimit} participants. Contact CropXon/Zenith team for more.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.participantEmails.includes(email)) {
       setFormData({
         ...formData,
         participantEmails: [...formData.participantEmails, email],
@@ -101,7 +126,7 @@ export const ScheduleMeetingModal = ({
       const scheduledAt = new Date(formData.date);
       scheduledAt.setHours(hours, minutes, 0, 0);
 
-      const { error } = await createMeeting(
+      const { data, error } = await createMeeting(
         formData.title,
         formData.description,
         scheduledAt,
@@ -110,6 +135,31 @@ export const ScheduleMeetingModal = ({
       );
 
       if (error) throw error;
+
+      // Send invites via edge function
+      if (formData.participantEmails.length > 0 && data) {
+        const { error: inviteError } = await supabase.functions.invoke('send-meeting-invite', {
+          body: {
+            meetingId: data.id,
+            meetingTitle: formData.title,
+            meetingLink: data.meeting_link,
+            scheduledAt: scheduledAt.toISOString(),
+            durationMinutes: parseInt(formData.duration),
+            hostName: profile?.full_name || 'Host',
+            participants: formData.participantEmails,
+            tenantPlan: tenantPlan,
+          },
+        });
+
+        if (inviteError) {
+          console.error('Failed to send invites:', inviteError);
+        } else {
+          toast({
+            title: 'Invites Sent',
+            description: `Invitations sent to ${formData.participantEmails.length} participants`,
+          });
+        }
+      }
 
       toast({
         title: 'Meeting Scheduled',
