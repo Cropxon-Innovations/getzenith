@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Twitter, Linkedin, Github, Youtube } from 'lucide-react';
+import { ZenithLogo } from './ZenithLogo';
+import { Twitter, Linkedin, Github, Youtube, Facebook, Instagram } from 'lucide-react';
 
 const footerLinks = {
   'Digital Business Studio': ['CMS', 'LMS', 'Website Builder', 'Automation Workflow Studio'],
@@ -9,10 +10,12 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Github, href: '#', label: 'GitHub' },
-  { icon: Youtube, href: '#', label: 'YouTube' },
+  { icon: Twitter, href: 'https://twitter.com/ZenithStudio', label: 'Twitter' },
+  { icon: Linkedin, href: 'https://linkedin.com/company/zenith-studio', label: 'LinkedIn' },
+  { icon: Facebook, href: 'https://facebook.com/ZenithStudio', label: 'Facebook' },
+  { icon: Instagram, href: 'https://instagram.com/zenithstudio', label: 'Instagram' },
+  { icon: Github, href: 'https://github.com/zenith-studio', label: 'GitHub' },
+  { icon: Youtube, href: 'https://youtube.com/@ZenithStudio', label: 'YouTube' },
 ];
 
 export const Footer = () => {
@@ -27,11 +30,7 @@ export const Footer = () => {
               whileHover={{ scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              <img 
-                src="/zenith-logo.png" 
-                alt="Zenith Logo" 
-                className="w-10 h-10 object-contain"
-              />
+              <ZenithLogo size={36} animated={false} />
               <div className="flex flex-col">
                 <span className="text-xl font-semibold">ZENITH</span>
                 <span className="text-xs text-muted-foreground">BY CROPXON</span>
@@ -51,18 +50,20 @@ export const Footer = () => {
                 Cropxon Innovations Pvt. Ltd.
               </a>
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-3">
               {socialLinks.map((social) => (
                 <motion.a
                   key={social.label}
                   href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Follow us on ${social.label}`}
+                  className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-secondary/50 transition-colors"
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
-                  <social.icon size={18} />
+                  <social.icon size={16} />
                 </motion.a>
               ))}
             </div>
