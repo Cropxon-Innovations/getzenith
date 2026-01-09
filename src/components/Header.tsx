@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, FileText, Globe, GraduationCap, Zap, Layout, Building2, BookOpen, CreditCard } from 'lucide-react';
+import { ZenithLogo } from './ZenithLogo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -41,11 +42,7 @@ export const Header = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
-              <img 
-                src="/zenith-logo.png" 
-                alt="Zenith Logo" 
-                className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
-              />
+              <ZenithLogo size={40} animated={false} />
               <div className="flex flex-col">
                 <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">
                   ZENITH

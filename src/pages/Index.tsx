@@ -12,6 +12,7 @@ import { CTASection } from '@/components/CTASection';
 import { Footer } from '@/components/Footer';
 import { SplashScreen } from '@/components/SplashScreen';
 import { ScrollAnimationWrapper } from '@/components/ScrollAnimationWrapper';
+import { SocialShareButtons } from '@/components/SocialShareButtons';
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(() => {
@@ -30,6 +31,8 @@ const Index = () => {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} duration={2500} />}
       <div className="min-h-screen bg-background text-foreground">
         <Header />
+        {/* Floating Social Share Buttons */}
+        <SocialShareButtons variant="floating" />
         <main>
           <HeroSection />
           
