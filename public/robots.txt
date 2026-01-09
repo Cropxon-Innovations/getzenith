@@ -1,3 +1,6 @@
+# Zenith Studio - Digital Business Studio by Cropxon Innovations
+# https://zenith.studio
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,20 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemaps
+Sitemap: https://zenith.studio/sitemap.xml
+
+# Crawl-delay (optional, for polite crawling)
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/*
+Disallow: /api/*
+Disallow: /auth/*
+
+# Allow important pages for SEO
+Allow: /pricing
+Allow: /docs
+Allow: /about
+Allow: /features

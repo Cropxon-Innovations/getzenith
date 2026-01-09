@@ -177,14 +177,19 @@ export const ZenithLogo = ({ size = 48, animated = true, className = '', showTex
       </motion.svg>
 
       {showText && (
-        <motion.span
+        <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
-          className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+          className="flex flex-col"
         >
-          Zenith
-        </motion.span>
+          <span className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent leading-tight">
+            ZENITH
+          </span>
+          <span className="text-[10px] text-muted-foreground font-medium tracking-wider">
+            BY CROPXON
+          </span>
+        </motion.div>
       )}
     </div>
   );

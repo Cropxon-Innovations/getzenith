@@ -11,7 +11,7 @@ const values = [
     title: 'Why Zenith Exists',
     content: `We started Zenith because we saw the same pattern everywhere: brilliant teams spending more time managing tools than building products. Every business needs content management, a web presence, learning systems, and automation — but connecting these pieces became a full-time job.
 
-    We asked: what if these weren't separate tools at all? What if they were layers of a single, coherent operating system?`,
+    At Cropxon Innovations, we asked: what if these weren't separate tools at all? What if they were layers of a single, coherent operating system?`,
   },
   {
     title: 'Why Tools Failed',
@@ -20,16 +20,16 @@ const values = [
     The result? Businesses spend 30% of their time on "tool overhead" — syncing data, maintaining integrations, training teams on different interfaces. We built Zenith to eliminate that overhead entirely.`,
   },
   {
-    title: 'Why Orchestration Matters',
-    content: `The future isn't about having the best individual tools. It's about how systems work together. When your CMS, website, learning platform, and automation engine share the same foundation, magic happens.
+    title: 'Digital Business Studio (DBS)',
+    content: `Zenith Studio is Cropxon's flagship Digital Business Studio — a complete operating system that combines CMS, LMS, Website Builder, and Automation Workflow Studio in one unified platform.
 
-    Content flows seamlessly into experiences. User actions trigger automated workflows. Learning outcomes connect to business results. This is orchestration — and it changes everything.`,
+    When your content management, website, learning platform, and automation engine share the same foundation, magic happens. Content flows seamlessly into experiences. User actions trigger automated workflows. Learning outcomes connect to business results.`,
   },
   {
     title: 'Our 10-Year Vision',
     content: `We're building the operating system that runs digital businesses. Not a platform you use, but infrastructure you rely on. Like AWS for compute or Stripe for payments, Zenith will be the default answer for "how do we run our digital operations?"
 
-    We're in year one of a decade-long mission. Every feature we ship, every integration we build, every enterprise we serve — it all moves us closer to a world where businesses focus on their mission, not their tools.`,
+    Cropxon Innovations is in year one of a decade-long mission. Every feature we ship, every integration we build, every enterprise we serve — it all moves us closer to a world where businesses focus on their mission, not their tools.`,
   },
 ];
 
