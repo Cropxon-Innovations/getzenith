@@ -647,8 +647,8 @@ export default function BusinessManagement() {
                           </div>
                           <div className="flex items-center gap-4 p-2 bg-background rounded border border-border">
                             <Badge variant="secondary">TXT</Badge>
-                            <span className="text-muted-foreground">_lovable</span>
-                            <span className="flex-1 truncate">lovable_verify={tenant?.id || 'your-verification-code'}</span>
+                            <span className="text-muted-foreground">_zenith</span>
+                            <span className="flex-1 truncate">zenith_verify={tenant?.id || 'your-verification-code'}</span>
                           </div>
                         </div>
                       </div>

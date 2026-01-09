@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, FileText, Globe, GraduationCap, Zap, Layout, Building2, BookOpen, CreditCard } from 'lucide-react';
-import { ZenithLogo } from './ZenithLogo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -42,10 +41,19 @@ export const Header = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
-              <ZenithLogo size={36} animated={false} />
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
-                Zenith
-              </span>
+              <img 
+                src="/zenith-logo.png" 
+                alt="Zenith Logo" 
+                className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+              />
+              <div className="flex flex-col">
+                <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">
+                  ZENITH
+                </span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-medium tracking-wider">
+                  BY CROPXON
+                </span>
+              </div>
             </Link>
 
             <nav className="hidden lg:flex items-center gap-1">

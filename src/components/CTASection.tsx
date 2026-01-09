@@ -40,7 +40,7 @@ export const CTASection = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-xl sm:text-2xl text-muted-foreground mb-4"
           >
-            Zenith Studio is not another tool.
+            Zenith Studio by Cropxon is not another tool.
           </motion.p>
 
           <motion.h2
@@ -48,11 +48,21 @@ export const CTASection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-12"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6"
           >
             It's how modern businesses{' '}
             <span className="text-gradient">run.</span>
           </motion.h2>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto"
+          >
+            Digital Business Studio (DBS) — CMS, LMS, Website Builder, and Automation Workflow Studio in one unified platform.
+          </motion.p>
 
           {/* CTA */}
           <motion.div

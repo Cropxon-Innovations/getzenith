@@ -117,7 +117,7 @@ export const SplashScreen = ({ onComplete, duration = 2500 }: SplashScreenProps)
 
             {/* Brand text */}
             <motion.div
-              className="flex flex-col items-center gap-2"
+              className="flex flex-col items-center gap-1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
                 opacity: phase === 'text' || phase === 'exit' ? (phase === 'exit' ? 0 : 1) : 0,
@@ -126,17 +126,27 @@ export const SplashScreen = ({ onComplete, duration = 2500 }: SplashScreenProps)
               transition={{ duration: 0.4, ease: 'easeOut' }}
             >
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-                Zenith
+                ZENITH
               </h1>
               <motion.p 
-                className="text-sm text-muted-foreground font-medium tracking-widest uppercase"
+                className="text-xs text-muted-foreground font-medium tracking-widest uppercase"
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: phase === 'text' ? 1 : 0 
+                }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+                BY CROPXON
+              </motion.p>
+              <motion.p 
+                className="text-sm text-muted-foreground font-medium tracking-widest uppercase mt-1"
                 initial={{ opacity: 0 }}
                 animate={{ 
                   opacity: phase === 'text' ? 1 : 0 
                 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
               >
-                Studio
+                Digital Business Studio
               </motion.p>
             </motion.div>
 
